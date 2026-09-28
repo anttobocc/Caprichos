@@ -1,30 +1,129 @@
-# Caprichos.Store.Ctes
+# 🧁 Caprichos
 
-**E-commerce para emprendimiento gastronómico desarrollado con Django.**
+### E-commerce gastronómico | Django · Python · JavaScript
 
-Aplicación web desarrollada para **Capricho — Boutique Empanadas & Bakery**, orientada a la gestión de productos, promociones y pedidos online.
+---
 
-## Funcionalidades
+## 👩‍💻 About the Project
 
-- Catálogo de productos organizado por categorías.
-- Productos con variantes y diferentes presentaciones.
+**Caprichos.Store.Ctes** es una aplicación web e-commerce desarrollada para **Capricho — Boutique Empanadas & Bakery**, un emprendimiento gastronómico.
+
+El proyecto fue desarrollado con **Django** y está orientado a la gestión de productos, categorías, variantes, combos, pedidos y usuarios, ofreciendo una experiencia de compra adaptada tanto a dispositivos de escritorio como a dispositivos móviles.
+
+La aplicación busca digitalizar el proceso de compra del negocio, desde la consulta del catálogo hasta la preparación y confirmación del pedido mediante WhatsApp.
+
+---
+
+## 🚀 Currently
+
+- 🧁 Desarrollando un e-commerce para un emprendimiento gastronómico.
+- 📦 Gestionando productos, categorías y variantes.
+- 🎁 Implementando combos promocionales.
+- 🛒 Desarrollando el carrito de compras.
+- 📅 Implementando selección de fecha para los pedidos.
+- 🚚 Trabajando con pedidos para retiro o envío.
+- 📱 Integrando la confirmación de pedidos mediante WhatsApp.
+- ⚙️ Desarrollando un panel de administración personalizado.
+- 📱 Adaptando la interfaz para dispositivos móviles.
+- 🖼️ Gestionando imágenes y recursos del catálogo.
+
+---
+
+## 🛠️ Languages and Tools
+
+### Languages
+
+![Languages](https://skillicons.dev/icons?i=python,js)
+
+### Web Development
+
+![Web Development](https://skillicons.dev/icons?i=html,css,django)
+
+### Database
+
+![Database](https://skillicons.dev/icons?i=sqlite)
+
+### Tools
+
+![Tools](https://skillicons.dev/icons?i=git,github,vscode)
+
+---
+
+## 📋 Main Features
+
+### 🛍️ Product Catalog
+
+El sistema cuenta con un catálogo organizado para facilitar la consulta de los productos.
+
+- Productos organizados por categorías.
+- Diferentes variantes y presentaciones.
 - Productos destacados.
-- Combos promocionales compuestos por múltiples productos.
-- Carrito de compras.
-- Gestión de cantidades y variantes.
-- Checkout para retiro o envío.
-- Selección de fecha para el pedido.
-- Confirmación de pedidos mediante WhatsApp.
-- Panel de administración personalizado.
-- Gestión de productos, categorías, variantes, combos y usuarios.
-- Gestión de pedidos y estados.
-- Administración de disponibilidad y visibilidad de productos.
-- Diseño responsive para desktop y mobile.
-- Gestión y personalización de imágenes del catálogo.
+- Combos promocionales.
+- Control de disponibilidad.
+- Control de visibilidad.
+- Gestión de imágenes.
+- Información y precios de los productos.
 
-## Panel de administración
+---
 
-El proyecto incluye un panel administrativo propio que permite gestionar el contenido y la operación de la tienda sin necesidad de modificar el código.
+### 🎁 Promotional Combos
+
+El sistema permite crear combos promocionales compuestos por diferentes productos del catálogo.
+
+Cada combo puede definir:
+
+- Productos incluidos.
+- Cantidad de cada producto.
+- Precio promocional.
+- Imagen.
+- Descripción.
+- Disponibilidad.
+
+Los combos forman parte del catálogo y pueden agregarse al carrito como cualquier otro producto.
+
+---
+
+### 🛒 Shopping Cart
+
+El carrito permite al cliente preparar su pedido antes de confirmarlo.
+
+- Agregar productos.
+- Seleccionar variantes.
+- Modificar cantidades.
+- Eliminar productos.
+- Visualizar el contenido del carrito.
+- Calcular el total del pedido.
+
+---
+
+### 📅 Checkout
+
+El proceso de checkout permite especificar la información necesaria para realizar el pedido.
+
+El cliente puede seleccionar:
+
+- Tipo de entrega.
+- Retiro en el local.
+- Envío.
+- Dirección de envío.
+- Fecha deseada.
+- Observaciones.
+
+El sistema aplica las reglas de negocio correspondientes antes de confirmar el pedido.
+
+---
+
+### 📱 WhatsApp Orders
+
+Una vez preparado el pedido, el sistema permite generar la información necesaria para enviarla mediante **WhatsApp**.
+
+Esto facilita la comunicación entre el cliente y el emprendimiento para coordinar la compra.
+
+---
+
+### ⚙️ Administration Panel
+
+El proyecto cuenta con un panel de administración personalizado para gestionar el funcionamiento de la tienda.
 
 Desde el panel se pueden administrar:
 
@@ -35,96 +134,69 @@ Desde el panel se pueden administrar:
 - Pedidos.
 - Usuarios.
 - Configuración del negocio.
+- Disponibilidad de productos.
+- Visibilidad del catálogo.
 
-## Sistema de combos
+---
 
-Los combos permiten crear productos promocionales compuestos por diferentes productos del catálogo.
+## 👥 User Management
 
-Cada combo puede definir:
+El sistema utiliza el sistema de autenticación de Django para gestionar los usuarios y sus permisos.
 
-- Productos incluidos.
-- Cantidad de cada producto.
-- Precio promocional.
-- Imagen.
-- Descripción.
-- Estado de disponibilidad.
+Permite trabajar con diferentes niveles de acceso según las necesidades de administración del sistema.
 
-Los combos forman parte del catálogo y pueden agregarse al carrito como cualquier otro producto.
+---
 
-## Gestión de pedidos
+## 📦 Order Management
 
-El sistema permite registrar pedidos con:
+Los pedidos almacenan la información necesaria para conservar el historial de cada compra.
+
+Cada pedido puede contener:
 
 - Datos del cliente.
-- Productos y variantes seleccionados.
+- Productos seleccionados.
+- Variantes.
 - Cantidades.
 - Precios.
 - Tipo de entrega.
 - Dirección de envío.
-- Fecha deseada.
+- Fecha solicitada.
 - Observaciones.
 - Estado del pedido.
 
-Los pedidos conservan los datos relevantes de los productos y precios utilizados al momento de realizar la compra, evitando que modificaciones posteriores del catálogo alteren el historial.
+Los datos relevantes de los productos y precios utilizados se conservan en el pedido para evitar que modificaciones posteriores del catálogo alteren la información histórica de una compra.
 
-## Arquitectura
+---
 
-El proyecto está dividido en aplicaciones según las responsabilidades del sistema:
+## 📱 Responsive Design
 
-```text
-catalogo/   → Productos, categorías, variantes y combos
-pedidos/    → Carrito y gestión de pedidos
-panel/      → Administración del negocio
-usuarios/   → Gestión de usuarios
-config/     → Configuración general del proyecto
-templates/  → Interfaces HTML
-static/     → CSS, JavaScript y recursos estáticos
-media/      → Imágenes y archivos multimedia
-```
+La interfaz fue desarrollada teniendo en cuenta diferentes tamaños de pantalla.
 
-## Tecnologías
+El diseño se adapta a:
 
-### Backend
+- 🖥️ Desktop.
+- 💻 Laptop.
+- 📱 Mobile.
 
-- Python
-- Django 6.1
-- Django ORM
-- Django Authentication
+La versión móvil utiliza estructuras y componentes adaptados para facilitar la navegación por el catálogo, la selección de productos y el proceso de compra desde pantallas pequeñas.
 
-### Frontend
+---
 
-- HTML5
-- CSS3
-- JavaScript
-- Django Templates
+## 📐 Business Rules
 
-### Base de datos
+El sistema contempla diferentes reglas relacionadas con la gestión de pedidos:
 
-- SQLite
-
-### Multimedia
-
-- Pillow
-
-## Diseño responsive
-
-La interfaz fue desarrollada contemplando diferentes resoluciones y cuenta con una experiencia específica para dispositivos móviles.
-
-El diseño mobile utiliza componentes y estructuras adaptadas para mejorar la navegación, visualización del catálogo y proceso de compra desde pantallas pequeñas.
-
-## Reglas de negocio
-
-El sistema contempla reglas específicas para la gestión de pedidos:
-
-- Los pedidos requieren un mínimo de 1 día de anticipación.
-- Se pueden seleccionar fechas de hasta 10 días de anticipación.
+- Los pedidos requieren un mínimo de **1 día de anticipación**.
+- Se pueden seleccionar fechas de hasta **10 días de anticipación**.
 - Los pedidos pueden realizarse para retiro en el local o mediante envío.
 - Los productos pueden configurarse como disponibles o no disponibles.
 - Los productos y categorías pueden mostrarse u ocultarse según su configuración.
 
-## Validaciones
+---
 
-El sistema incorpora validaciones tanto en el backend como en los formularios para controlar:
+## ✅ Validations
+
+El sistema incorpora validaciones en el backend y en los formularios para controlar:
 
 - Datos de los clientes.
 - Cantidades de productos.
@@ -132,43 +204,26 @@ El sistema incorpora validaciones tanto en el backend como en los formularios pa
 - Fechas de pedido.
 - Tipo de entrega.
 - Disponibilidad de productos.
-- Reglas propias del negocio.
+- Reglas específicas del negocio.
 
-## Ejecución
+---
 
-```bash
-git clone https://github.com/anttobocc/Caprichos.Store.Ctes.git
-cd Caprichos.Store.Ctes
+## 🏗️ Project Architecture
 
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-```
+El proyecto se encuentra organizado en diferentes aplicaciones según las responsabilidades del sistema:
 
-La configuración sensible se gestiona mediante variables de entorno.
-
-## Objetivo del proyecto
-
-El proyecto fue desarrollado como una solución e-commerce completa para un negocio gastronómico, integrando:
-
-**Catálogo → productos → variantes → combos → carrito → checkout → pedidos → administración**
-
-Además de resolver las necesidades funcionales del negocio, el proyecto permitió trabajar sobre:
-
-- Arquitectura backend.
-- Modelado de datos.
-- Reglas de negocio.
-- Autenticación y autorización.
-- Gestión de archivos e imágenes.
-- Diseño responsive.
-- Experiencia de usuario.
-- Integración entre frontend y backend.
-- Gestión de pedidos y estados.
-
-## Autora 
-
-**Antonella Boccalandro**
-
-Desarrollo y diseño del proyecto.
-
-[GitHub](https://github.com/anttobocc)
+```text
+Caprichos.Store.Ctes/
+│
+├── catalogo/       → Productos, categorías, variantes y combos
+├── pedidos/        → Carrito y gestión de pedidos
+├── panel/          → Administración del negocio
+├── usuarios/       → Gestión de usuarios
+├── config/         → Configuración general del proyecto
+│
+├── templates/      → Interfaces HTML
+├── static/         → CSS, JavaScript y recursos estáticos
+├── media/          → Imágenes y archivos multimedia
+│
+├── manage.py
+└── README.md
