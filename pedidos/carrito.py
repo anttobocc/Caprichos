@@ -4,6 +4,12 @@ La sesión guarda únicamente identificadores y cantidades:
 
     {"<producto_id>:<variante_id o vacío>": cantidad}
     {"combo:<combo_id>": cantidad}
+    {"combo:<combo_id>:<huella>": cantidad}   (combo con opciones a elección)
+
+Las opciones elegidas de un combo viven aparte, en otra clave de sesión
+({clave: [[nombre_eleccion, opcion], ...]}), y la clave del carrito lleva
+una huella de esas opciones: el mismo combo con opciones distintas ocupa
+líneas distintas, y la clave sigue siendo segura para usar en la URL.
 
 El precio NUNCA se guarda en la sesión: Carrito.items() y Carrito.total()
 siempre vuelven a consultar Producto/VarianteProducto/Combo en la base para
@@ -23,9 +29,13 @@ tiene esa segunda distinción: si no está activo, la línea se descarta
 directamente en Carrito.items(), así que una LineaCarritoCombo resuelta
 siempre está disponible.
 """
+import hashlib
+import json
+
 from catalogo.models import Combo, Producto, VarianteProducto
 
 SESSION_KEY = "carrito"
+SESSION_KEY_ELECCIONES = "carrito_elecciones"
 PREFIJO_COMBO = "combo:"
 
 
@@ -33,8 +43,25 @@ def _clave(producto_id, variante_id):
     return f"{producto_id}:{variante_id or ''}"
 
 
-def _clave_combo(combo_id):
-    return f"{PREFIJO_COMBO}{combo_id}"
+def _clave_combo(combo_id, elecciones=()):
+    if not elecciones:
+        return f"{PREFIJO_COMBO}{combo_id}"
+    huella = hashlib.sha1(json.dumps(elecciones, ensure_ascii=False).encode()).hexdigest()[:10]
+    return f"{PREFIJO_COMBO}{combo_id}:{huella}"
+
+
+def _elecciones_vigentes(combo, elecciones):
+    """True si `elecciones` sigue cubriendo exactamente las opciones a
+    elección actuales del combo (mismas elecciones, en el mismo orden, y
+    cada opción todavía existe). Si el panel las cambió después de que el
+    cliente agregó el combo, la línea ya no es válida."""
+    vigentes = list(combo.elecciones.all())
+    if len(vigentes) != len(elecciones):
+        return False
+    return all(
+        nombre == eleccion.nombre and opcion in eleccion.lista_opciones
+        for (nombre, opcion), eleccion in zip(elecciones, vigentes)
+    )
 
 
 class LineaCarrito:
@@ -53,6 +80,10 @@ class LineaCarrito:
         return self.producto.imagen
 
     @property
+    def detalle(self):
+        return self.variante.nombre if self.variante else ""
+
+    @property
     def precio_unitario(self):
         return self.variante.precio if self.variante else self.producto.precio
 
@@ -69,14 +100,20 @@ class LineaCarritoCombo:
     """Línea de carrito para un Combo — misma interfaz que LineaCarrito
     (clave/cantidad/nombre/imagen/precio_unitario/subtotal/disponible) para
     que las plantillas del carrito no necesiten ramificar por tipo.
-    `variante` siempre es None: los combos no tienen variantes."""
+    `variante` siempre es None: los combos no tienen variantes; en su lugar
+    `elecciones` guarda las opciones elegidas ([[nombre, opcion], ...])."""
 
-    def __init__(self, clave, combo, cantidad):
+    def __init__(self, clave, combo, cantidad, elecciones=()):
         self.clave = clave
         self.combo = combo
         self.producto = None
         self.variante = None
         self.cantidad = cantidad
+        self.elecciones = list(elecciones)
+
+    @property
+    def detalle(self):
+        return " · ".join(f"{nombre}: {opcion}" for nombre, opcion in self.elecciones)
 
     @property
     def nombre(self):
@@ -106,6 +143,9 @@ class Carrito:
     def _datos(self):
         return self.session.setdefault(SESSION_KEY, {})
 
+    def _elecciones(self):
+        return self.session.setdefault(SESSION_KEY_ELECCIONES, {})
+
     def _guardar(self):
         self.session.modified = True
 
@@ -119,12 +159,17 @@ class Carrito:
         datos[clave] = datos.get(clave, 0) + cantidad
         self._guardar()
 
-    def agregar_combo(self, combo, cantidad=1):
-        """Agrega `cantidad` unidades de `combo` al carrito. Misma no-validación
-        que `agregar()`: la vista ya resolvió `combo` (activo) antes de llamar."""
+    def agregar_combo(self, combo, cantidad=1, elecciones=()):
+        """Agrega `cantidad` unidades de `combo` al carrito, con las opciones
+        elegidas ([[nombre_eleccion, opcion], ...]). Misma no-validación que
+        `agregar()`: la vista ya resolvió `combo` (activo) y validó las
+        opciones antes de llamar."""
+        elecciones = [list(par) for par in elecciones]
         datos = self._datos()
-        clave = _clave_combo(combo.pk)
+        clave = _clave_combo(combo.pk, elecciones)
         datos[clave] = datos.get(clave, 0) + cantidad
+        if elecciones:
+            self._elecciones()[clave] = elecciones
         self._guardar()
 
     def actualizar_cantidad(self, clave, cantidad):
@@ -133,6 +178,7 @@ class Carrito:
             return
         if cantidad < 1:
             del datos[clave]
+            self._elecciones().pop(clave, None)
         else:
             datos[clave] = cantidad
         self._guardar()
@@ -141,10 +187,12 @@ class Carrito:
         datos = self._datos()
         if clave in datos:
             del datos[clave]
+            self._elecciones().pop(clave, None)
             self._guardar()
 
     def vaciar(self):
         self.session[SESSION_KEY] = {}
+        self.session[SESSION_KEY_ELECCIONES] = {}
         self._guardar()
 
     def esta_vacio(self):
@@ -164,7 +212,7 @@ class Carrito:
         for clave, cantidad in list(datos.items()):
             if clave.startswith(PREFIJO_COMBO):
                 try:
-                    combo_id = int(clave[len(PREFIJO_COMBO):])
+                    combo_id = int(clave[len(PREFIJO_COMBO):].partition(":")[0])
                 except ValueError:
                     claves_a_quitar.append(clave)
                     continue
@@ -174,7 +222,15 @@ class Carrito:
                     if mensajes is not None:
                         mensajes.append("Un combo de tu carrito ya no está disponible y fue quitado.")
                     continue
-                lineas.append(LineaCarritoCombo(clave, combo, cantidad))
+                elecciones = self._elecciones().get(clave, [])
+                if not _elecciones_vigentes(combo, elecciones):
+                    claves_a_quitar.append(clave)
+                    if mensajes is not None:
+                        mensajes.append(
+                            f'Las opciones de "{combo.nombre}" cambiaron y fue quitado de tu carrito. Volvé a agregarlo.'
+                        )
+                    continue
+                lineas.append(LineaCarritoCombo(clave, combo, cantidad, elecciones))
                 continue
 
             producto_id_str, _, variante_id_str = clave.partition(":")
@@ -209,6 +265,7 @@ class Carrito:
         if claves_a_quitar:
             for clave in claves_a_quitar:
                 datos.pop(clave, None)
+                self._elecciones().pop(clave, None)
             self._guardar()
 
         return lineas

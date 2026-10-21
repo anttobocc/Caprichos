@@ -3,10 +3,10 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
-    {% if modo_edicion %}<link rel="stylesheet" href="{% static 'css/panel_preview_editor.css' %}">{% endif %}
+    <link rel="stylesheet" href="{% static 'css/movimiento.css' %}">
+    {# Activa la aparición al hacer scroll antes del primer pintado (sin parpadeo). Si movimiento.js no llega a correr, a los 3 s se muestra todo igual. #}
+    <script>document.documentElement.classList.add("con-js");window.__movimientoRespaldo=setTimeout(function(){document.documentElement.classList.remove("con-js");},3000);</script>
 {% endblock %}
-
-{% block body_class %}{% if modo_edicion %}modo-edicion{% endif %}{% endblock %}
 
 {% block content %}
 <input type="checkbox" id="menu-toggle" class="menu-toggle" hidden>
@@ -49,8 +49,8 @@
         <nav class="site-nav">
             <a href="{% url 'catalogo:home' %}" class="{% if request.resolver_match.url_name == 'home' %}site-nav__link--activo{% endif %}">Inicio</a>
             <a href="{% url 'catalogo:productos' %}">Productos</a>
+            {% if hay_combos_activos %}<a href="{% url 'catalogo:home' %}#combos">Combos</a>{% endif %}
             <a href="{% url 'catalogo:home' %}#destacados">Destacados</a>
-            {% if hay_combos_activos %}<a href="{% url 'catalogo:combos' %}">Combos</a>{% endif %}
         </nav>
 
         <div class="site-header__acciones">
@@ -67,8 +67,8 @@
     <nav class="site-nav site-nav--mobile">
         <a href="{% url 'catalogo:home' %}">Inicio</a>
         <a href="{% url 'catalogo:productos' %}">Productos</a>
-        <a href="{% url 'catalogo:home' %}#destacados">Destacados</a>
         {% if hay_combos_activos %}<a href="{% url 'catalogo:home' %}#combos">Combos</a>{% endif %}
+        <a href="{% url 'catalogo:home' %}#destacados">Destacados</a>
     </nav>
 </header>
 
@@ -93,6 +93,7 @@
 
 <script src="{% static 'js/carrito_drawer.js' %}" defer></script>
 <script src="{% static 'js/fecha_picker.js' %}" defer></script>
+<script src="{% static 'js/movimiento.js' %}" defer></script>
 
 <main>
     {% block catalogo_content %}{% endblock %}
@@ -132,7 +133,6 @@
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5s-.6-1.4-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
                 Escribinos
             </a>
-            {% if configuracion_negocio.direccion %}<p>{{ configuracion_negocio.direccion }}</p>{% endif %}
         </div>
         <div class="site-footer__col">
             <h4>Pedidos</h4>
@@ -155,12 +155,20 @@
     <div class="contenedor site-footer__social">
         {% if configuracion_negocio.instagram %}
         <a href="{{ configuracion_negocio.instagram }}" target="_blank" rel="noopener" class="site-footer__social-icono" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+            <span class="site-footer__tooltip" aria-hidden="true">Instagram</span>
         </a>
         {% endif %}
         <a href="{{ whatsapp_link_general }}" target="_blank" rel="noopener" class="site-footer__social-icono" aria-label="WhatsApp">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.2.2-.3.2-.5.1-.2 0-.4 0-.5s-.6-1.4-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+            <span class="site-footer__tooltip" aria-hidden="true">WhatsApp</span>
         </a>
+        {% if configuracion_negocio.direccion %}
+        <a href="{{ google_maps_url }}" target="_blank" rel="noopener" class="site-footer__social-icono" aria-label="Ver {{ configuracion_negocio.direccion }} en Google Maps">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            <span class="site-footer__tooltip" aria-hidden="true">{{ configuracion_negocio.direccion }}</span>
+        </a>
+        {% endif %}
     </div>
 
     <div class="site-footer__creditos">
@@ -168,8 +176,4 @@
     </div>
 </footer>
 
-{% if modo_edicion %}
-<script>window.CAPRICHO_CSRF_TOKEN = "{{ csrf_token }}"; window.CAPRICHO_GUARDAR_IMAGEN_URL = "{% url 'panel:preview_guardar_imagen' %}";</script>
-<script src="{% static 'js/panel_preview_editor.js' %}" defer></script>
-{% endif %}
 {% endblock %}

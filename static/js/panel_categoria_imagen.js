@@ -1,9 +1,9 @@
-/* Editor visual único de posición/tamaño de imagen, reutilizado por
+/* Editor visual único de posición de imagen, reutilizado por
  * categorías, la tarjeta "Pedidos", la portada del hero, productos y
- * combos: arrastrar para mover, botones −/+/↑/↓, campos numéricos y
- * deslizador de tamaño/zoom. Todo queda sincronizado entre sí: mover
- * cualquiera de los controles actualiza de inmediato el preview y el
- * resto de los controles.
+ * combos: desde el panel solo se arrastra la imagen para moverla. X/Y y
+ * el tamaño/zoom viajan en campos ocultos; el tamaño/zoom no se edita
+ * desde el panel (se respeta el valor guardado). Los manejadores de
+ * botones/deslizador siguen acá por si algún editor vuelve a mostrarlos.
  *
  * Los campos se ubican por sufijo de nombre ("..._pos_x" / "..._pos_y" y
  * "..._tamano" o "..._zoom") para que un mismo editor sirva a cualquier

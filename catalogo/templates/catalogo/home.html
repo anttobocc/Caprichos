@@ -16,7 +16,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
 <section class="hero">
     <div class="hero__imagen" aria-hidden="true">
         <div class="hero__imagen-marco">
-            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}" alt="" style="--img-x:{{ configuracion_negocio.portada_imagen_pos_x }};--img-y:{{ configuracion_negocio.portada_imagen_pos_y }};--img-zoom:{{ configuracion_negocio.portada_imagen_zoom }};"{% if modo_edicion %} data-editable-imagen data-entidad="configuracion" data-prefijo="portada_imagen" data-modo="recorte" data-nombre="Foto principal del hero"{% endif %}>
+            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}" alt="" style="--img-x:{{ configuracion_negocio.portada_imagen_pos_x }};--img-y:{{ configuracion_negocio.portada_imagen_pos_y }};--img-zoom:{{ configuracion_negocio.portada_imagen_zoom }};">
         </div>
     </div>
 
@@ -58,11 +58,11 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                 </div>
             </div>
             {% if categoria.slug == "empanadas" %}
-                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="categoria" data-id="{{ categoria.pk }}" data-prefijo="imagen" data-modo="flotante" data-nombre="{{ categoria.nombre }}"{% endif %}><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho"></div>
             {% elif categoria.slug == "budines" %}
-                <div class="categoria-card__imagen categoria-card__imagen--budines" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="categoria" data-id="{{ categoria.pk }}" data-prefijo="imagen" data-modo="flotante" data-nombre="{{ categoria.nombre }}"{% endif %}><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--budines" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho"></div>
             {% elif categoria.slug == "dulces" %}
-                <div class="categoria-card__imagen categoria-card__imagen--tartas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="categoria" data-id="{{ categoria.pk }}" data-prefijo="imagen" data-modo="flotante" data-nombre="{{ categoria.nombre }}"{% endif %}><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--tartas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho"></div>
             {% elif categoria.imagen_categoria %}
                 {% comment %}
                 Categorías sin arte dedicado (ej. Alfajores) usan la imagen de
@@ -70,7 +70,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                 la tarjeta se muestra sin imagen decorativa (el layout ya
                 contempla ese caso, ver .categoria-card__imagen en el CSS).
                 {% endcomment %}
-                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="categoria" data-id="{{ categoria.pk }}" data-prefijo="imagen" data-modo="flotante" data-nombre="{{ categoria.nombre }}"{% endif %}><img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho"></div>
             {% endif %}
         </article>
         {% endfor %}
@@ -95,7 +95,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                     <a href="{{ whatsapp_link_general }}" target="_blank" rel="noopener" class="categoria-card__enlace">Pedí ahora ♥</a>
                 </div>
             </div>
-            <div class="categoria-card__imagen categoria-card__imagen--pedidos" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="configuracion" data-prefijo="pedidos_imagen" data-modo="flotante" data-nombre="Pedidos"{% endif %}><img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho"></div>
+            <div class="categoria-card__imagen categoria-card__imagen--pedidos" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_tamano }};"><img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho"></div>
         </article>
     </div>
 </section>
@@ -107,11 +107,9 @@ de WhatsApp) y los mismos assets de imagen que desktop — no
 hay imágenes nuevas ni lógica de negocio duplicada — pero con
 markup y clases propias ("m-*") pensadas para esta pantalla,
 no una copia reducida del markup de desktop. Las imágenes de
-categorías SÍ llevan data-editable-imagen (prefijo "imagen_mobile"
-/ "pedidos_imagen_mobile", modo "flotante-movil"): tienen su
-propia posición/escala en el modelo, independiente de la
-desktop, editable desde el panel con el selector Desktop/Mobile
-(ver panel_preview_editor.js).
+categorías tienen su propia posición/escala mobile en el modelo
+(prefijo "imagen_mobile" / "pedidos_imagen_mobile"),
+independiente de la desktop.
 {% endcomment %}
 <div class="home-mobile">
     <section class="m-hero">
@@ -149,7 +147,7 @@ desktop, editable desde el panel con el selector Desktop/Mobile
                     {% if categoria.descripcion %}<p>{{ categoria.descripcion }}</p>{% endif %}
                     <a href="{% url 'catalogo:categoria_detalle' categoria.slug %}" class="m-card__enlace">Ver más ♥</a>
                 </div>
-                <div class="m-card__imagen" style="--imagen-x:{{ categoria.imagen_mobile_pos_x }};--imagen-y:{{ categoria.imagen_mobile_pos_y }};--imagen-size:{{ categoria.imagen_mobile_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="categoria" data-id="{{ categoria.pk }}" data-prefijo="imagen_mobile" data-modo="flotante-movil" data-nombre="{{ categoria.nombre }} (mobile)"{% endif %}>
+                <div class="m-card__imagen" style="--imagen-x:{{ categoria.imagen_mobile_pos_x }};--imagen-y:{{ categoria.imagen_mobile_pos_y }};--imagen-size:{{ categoria.imagen_mobile_tamano }};">
                     {% if categoria.slug == "empanadas" %}
                         <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho">
                     {% elif categoria.slug == "budines" %}
@@ -169,46 +167,13 @@ desktop, editable desde el panel con el selector Desktop/Mobile
                     <p>Encargá tu docena fácil y rápido.</p>
                     <a href="{{ whatsapp_link_general }}" target="_blank" rel="noopener" class="m-card__enlace">Pedí ahora ♥</a>
                 </div>
-                <div class="m-card__imagen" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_mobile_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_mobile_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_mobile_tamano }};"{% if modo_edicion %} data-editable-imagen data-entidad="configuracion" data-prefijo="pedidos_imagen_mobile" data-modo="flotante-movil" data-nombre="Pedidos (mobile)"{% endif %}>
+                <div class="m-card__imagen" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_mobile_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_mobile_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_mobile_tamano }};">
                     <img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho">
                 </div>
             </article>
         </div>
     </section>
 </div>
-
-{% if destacados %}
-<section class="destacados" id="destacados">
-    <div class="contenedor">
-        <div class="seccion-titulo">
-            <svg class="seccion-titulo__corazon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C.4 8 2 4.5 5.6 4.5c2 0 3.6 1.1 4.4 2.7.8-1.6 2.4-2.7 4.4-2.7C18 4.5 19.6 8 20 11.7 17.5 16.4 12 21 12 21z" fill="var(--color-terracota)"/></svg>
-            <h2 class="titulo-decorado titulo-decorado--destacados">
-                <svg class="titulo-decorado__rama" viewBox="0 0 64 24" aria-hidden="true">
-                    <path d="M2 12h42" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M16 12c0-5 4-8 8-8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M16 12c0 5 4 8 8 8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M32 12c0-4 3-6 6-6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M32 12c0 4 3 6 6 6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                </svg>
-                Productos destacados
-                <svg class="titulo-decorado__rama titulo-decorado__rama--derecha" viewBox="0 0 64 24" aria-hidden="true">
-                    <path d="M2 12h42" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M16 12c0-5 4-8 8-8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M16 12c0 5 4 8 8 8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M32 12c0-4 3-6 6-6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                    <path d="M32 12c0 4 3 6 6 6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
-                </svg>
-            </h2>
-            <p class="subtitulo-centrado">Lo más elegido por nuestros clientes</p>
-        </div>
-        <div class="productos-grid productos-grid--destacados">
-            {% for producto in destacados %}
-                {% include "catalogo/_producto_card.html" %}
-            {% endfor %}
-        </div>
-    </div>
-</section>
-{% endif %}
 
 {% if combos %}
 <section class="destacados" id="combos">
@@ -237,6 +202,39 @@ desktop, editable desde el panel con el selector Desktop/Mobile
         <div class="productos-grid productos-grid--destacados">
             {% for combo in combos %}
                 {% include "catalogo/_combo_card.html" %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if destacados %}
+<section class="destacados" id="destacados">
+    <div class="contenedor">
+        <div class="seccion-titulo">
+            <svg class="seccion-titulo__corazon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.6-10-9.3C.4 8 2 4.5 5.6 4.5c2 0 3.6 1.1 4.4 2.7.8-1.6 2.4-2.7 4.4-2.7C18 4.5 19.6 8 20 11.7 17.5 16.4 12 21 12 21z" fill="var(--color-terracota)"/></svg>
+            <h2 class="titulo-decorado titulo-decorado--destacados">
+                <svg class="titulo-decorado__rama" viewBox="0 0 64 24" aria-hidden="true">
+                    <path d="M2 12h42" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M16 12c0-5 4-8 8-8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M16 12c0 5 4 8 8 8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M32 12c0-4 3-6 6-6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M32 12c0 4 3 6 6 6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                </svg>
+                Productos destacados
+                <svg class="titulo-decorado__rama titulo-decorado__rama--derecha" viewBox="0 0 64 24" aria-hidden="true">
+                    <path d="M2 12h42" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M16 12c0-5 4-8 8-8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M16 12c0 5 4 8 8 8" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M32 12c0-4 3-6 6-6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                    <path d="M32 12c0 4 3 6 6 6" stroke="var(--color-oliva)" stroke-width="1.2" fill="none"/>
+                </svg>
+            </h2>
+            <p class="subtitulo-centrado">Lo más elegido por nuestros clientes</p>
+        </div>
+        <div class="productos-grid productos-grid--destacados">
+            {% for producto in destacados %}
+                {% include "catalogo/_producto_card.html" %}
             {% endfor %}
         </div>
     </div>

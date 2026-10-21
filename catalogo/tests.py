@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.text import slugify
 
 from .models import Categoria, Combo, Producto, VarianteProducto
 
@@ -22,6 +23,26 @@ def crear_producto(categoria, **kwargs):
     }
     datos.update(kwargs)
     return Producto.objects.create(**datos)
+
+
+def crear_eleccion(combo, nombre, sabores, categoria_nombre="Tartas"):
+    """Crea una opción a elección con un producto activo por sabor, dentro
+    de la categoría indicada (ej. "Tarta de frutilla" en "Tartas", que se
+    muestra al cliente como "Frutilla")."""
+    categoria, _ = Categoria.objects.get_or_create(
+        nombre=categoria_nombre, defaults={"slug": slugify(categoria_nombre)},
+    )
+    singular = categoria_nombre.rstrip("s")
+    productos = [
+        Producto.objects.create(
+            categoria=categoria, nombre=f"{singular} de {sabor.lower()}",
+            slug=slugify(f"{singular}-{sabor}-{combo.pk}-{nombre}"), unidad_venta="unidad", precio=1000,
+        )
+        for sabor in sabores
+    ]
+    eleccion = combo.elecciones.create(nombre=nombre)
+    eleccion.productos.set(productos)
+    return eleccion
 
 
 class CatalogoPublicoTests(TestCase):
@@ -153,15 +174,27 @@ def crear_combo(**kwargs):
 
 
 class ComboPublicoTests(TestCase):
-    def test_combo_activo_aparece_en_pagina_de_combos(self):
-        crear_combo(nombre="Combo Visible Test", slug="combo-visible-test")
+    def test_url_de_combos_redirige_a_la_seccion_del_inicio(self):
         respuesta = self.client.get(reverse("catalogo:combos"))
+        self.assertRedirects(respuesta, reverse("catalogo:home") + "#combos", fetch_redirect_response=False)
+
+    def test_combo_activo_aparece_en_el_inicio(self):
+        crear_combo(nombre="Combo Visible Test", slug="combo-visible-test")
+        respuesta = self.client.get(reverse("catalogo:home"))
         self.assertContains(respuesta, "Combo Visible Test")
 
-    def test_combo_inactivo_no_aparece_en_pagina_de_combos(self):
+    def test_combo_inactivo_no_aparece_en_el_inicio(self):
         crear_combo(nombre="Combo Oculto Test", slug="combo-oculto-test", activo=False)
-        respuesta = self.client.get(reverse("catalogo:combos"))
+        respuesta = self.client.get(reverse("catalogo:home"))
         self.assertNotContains(respuesta, "Combo Oculto Test")
+
+    def test_detalle_muestra_opciones_a_eleccion(self):
+        combo = crear_combo(nombre="Combo Elecciones Test", slug="combo-elecciones-test")
+        eleccion = crear_eleccion(combo, "Mini tarta", ["Frutilla", "Limón"])
+        respuesta = self.client.get(reverse("catalogo:combo_detalle", args=["combo-elecciones-test"]))
+        self.assertContains(respuesta, f'<select id="eleccion_{eleccion.pk}" name="eleccion_{eleccion.pk}"')
+        self.assertContains(respuesta, '<option value="Frutilla">Frutilla</option>', html=True)
+        self.assertContains(respuesta, '<option value="Limón">Limón</option>', html=True)
 
     def test_combo_activo_da_200_en_detalle(self):
         crear_combo(nombre="Combo Detalle Test", slug="combo-detalle-test")

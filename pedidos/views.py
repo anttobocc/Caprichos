@@ -114,7 +114,18 @@ def carrito_agregar_combo(request, combo_id):
         messages.error(request, "La cantidad debe ser un número entero mayor o igual a 1.")
         return redirect("catalogo:combo_detalle", slug=combo.slug)
 
-    Carrito(request).agregar_combo(combo, cantidad)
+    elecciones = []
+    for eleccion in combo.elecciones.all():
+        opcion = request.POST.get(f"eleccion_{eleccion.pk}", "")
+        if opcion not in eleccion.lista_opciones:
+            error = f'Elegí una opción de "{eleccion.nombre}".'
+            if es_ajax:
+                return _respuesta_drawer_json(request, error=error)
+            messages.error(request, error)
+            return redirect("catalogo:combo_detalle", slug=combo.slug)
+        elecciones.append([eleccion.nombre, opcion])
+
+    Carrito(request).agregar_combo(combo, cantidad, elecciones)
     if es_ajax:
         return _respuesta_drawer_json(request)
     messages.success(request, f'"{combo.nombre}" se agregó al carrito.')
@@ -216,7 +227,7 @@ def checkout(request):
                         variante=linea.variante,
                         combo=linea.combo if es_combo else None,
                         nombre_producto=linea.nombre,
-                        nombre_variante=linea.variante.nombre if linea.variante else "",
+                        nombre_variante=linea.detalle,
                         cantidad=linea.cantidad,
                         precio_unitario=linea.precio_unitario,
                     )

@@ -38,10 +38,4 @@ urlpatterns = [
     path("combos/<int:pk>/editar/", views.combo_editar, name="combo_editar"),
     path("combos/<int:pk>/activo/", views.combo_toggle_activo, name="combo_toggle_activo"),
     path("combos/<int:pk>/eliminar/", views.combo_eliminar, name="combo_eliminar"),
-    path("preview/home/", views.preview_home, name="preview_home"),
-    path("preview/productos/", views.preview_productos, name="preview_productos"),
-    path("preview/categoria/<slug:slug>/", views.preview_categoria, name="preview_categoria"),
-    path("preview/producto/<slug:slug>/", views.preview_producto, name="preview_producto"),
-    path("preview/combo/<slug:slug>/", views.preview_combo, name="preview_combo"),
-    path("preview/guardar-imagen/", views.preview_guardar_imagen, name="preview_guardar_imagen"),
 ]

@@ -6,7 +6,7 @@
 <section class="contenedor producto-detalle">
     <div class="producto-detalle__imagen">
         {% if combo.imagen %}
-            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};"{% if modo_edicion %} data-editable-imagen data-entidad="combo" data-id="{{ combo.pk }}" data-prefijo="imagen" data-modo="recorte" data-nombre="{{ combo.nombre }}"{% endif %}>
+            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};">
         {% else %}
             <div class="producto-card__sin-imagen producto-detalle__sin-imagen" aria-hidden="true">🎁</div>
         {% endif %}
@@ -17,14 +17,21 @@
         <h1>{{ combo.nombre }}</h1>
 
         {% if combo.descripcion %}<p>{{ combo.descripcion|linebreaksbr }}</p>{% endif %}
-
-        {% if combo.precio_individual_total %}
-            <p class="producto-card__unidad"><s>${{ combo.precio_individual_total }}</s></p>
-        {% endif %}
         <p class="producto-card__precio">${{ combo.precio_promocional }}</p>
 
         <form method="post" action="{% url 'pedidos:carrito_agregar_combo' combo.pk %}" class="producto-detalle__form">
             {% csrf_token %}
+            {% for eleccion in combo.elecciones.all %}
+            <div class="producto-detalle__eleccion">
+                <label class="producto-detalle__eje-titulo" for="eleccion_{{ eleccion.pk }}">{{ eleccion.nombre }}</label>
+                <select id="eleccion_{{ eleccion.pk }}" name="eleccion_{{ eleccion.pk }}" class="producto-detalle__select" required>
+                    <option value="" selected disabled>Elegí una opción</option>
+                    {% for opcion in eleccion.lista_opciones %}
+                    <option value="{{ opcion }}">{{ opcion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
             <div class="producto-detalle__cantidad">
                 <span>Cantidad:</span>
                 <div class="stepper-cantidad">
@@ -38,5 +45,5 @@
     </div>
 </section>
 
-<p class="contenedor pagina-listado__volver"><a href="{% url 'catalogo:combos' %}">← Volver a combos</a></p>
+<p class="contenedor pagina-listado__volver"><a href="{% url 'catalogo:home' %}#combos">← Volver a combos</a></p>
 {% endblock %}

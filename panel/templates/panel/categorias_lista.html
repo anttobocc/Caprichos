@@ -48,7 +48,6 @@
                             <td data-label="Estado">{% include "panel/includes/_switch.html" with accion_url=url_toggle activo=categoria.activo %}</td>
                             <td class="admin-table__acciones">
                                 <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-panel-target="#panel-categoria-{{ categoria.pk }}">Editar</button>
-                                <a href="{% url 'panel:preview_home' %}" class="admin-btn admin-btn--secondary admin-btn--sm">Vista previa ✎</a>
                                 <button type="button" class="admin-btn admin-btn--danger admin-btn--sm" data-modal-target="#modal-eliminar-categoria-{{ categoria.pk }}">Eliminar</button>
                             </td>
                         </tr>
@@ -64,7 +63,6 @@
                             <td data-label="Estado">—</td>
                             <td class="admin-table__acciones">
                                 <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-panel-target="#panel-pedidos-imagen">Editar</button>
-                                <a href="{% url 'panel:preview_home' %}" class="admin-btn admin-btn--secondary admin-btn--sm">Vista previa ✎</a>
                             </td>
                         </tr>
                         <tr>
@@ -74,7 +72,6 @@
                             <td data-label="Estado">—</td>
                             <td class="admin-table__acciones">
                                 <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-panel-target="#panel-portada-imagen">Editar</button>
-                                <a href="{% url 'panel:preview_home' %}" class="admin-btn admin-btn--secondary admin-btn--sm">Vista previa ✎</a>
                             </td>
                         </tr>
                     </tbody>

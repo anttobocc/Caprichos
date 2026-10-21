@@ -4,19 +4,11 @@ from django.contrib.auth.models import User
 from django.forms import inlineformset_factory
 from django.utils.text import slugify
 
-from catalogo.models import Categoria, Combo, ComboItem, Producto, VarianteProducto
+from catalogo.models import Categoria, Combo, ComboEleccion, Producto, VarianteProducto
+from catalogo.templatetags.catalogo_extras import quitar_prefijo_categoria
 from pedidos.models import Pedido
 
 from .models import ConfiguracionNegocio
-
-
-class ImagenPortadaWidget(forms.ClearableFileInput):
-    """ClearableFileInput con una plantilla propia (botón + nombre de
-    archivo + "Eliminar imagen" en una fila), en vez del markup por
-    defecto de Django ("Currently:"/"Change:"). Usado por la imagen de
-    portada de categorías y por la imagen de la tarjeta "Pedidos"."""
-
-    template_name = "panel/includes/_widget_imagen_portada.html"
 
 
 class ImagenSimpleWidget(forms.ClearableFileInput):
@@ -24,7 +16,7 @@ class ImagenSimpleWidget(forms.ClearableFileInput):
     nombre del archivo actual ni checkbox "Eliminar imagen". Elegir un
     archivo nuevo reemplaza al anterior al guardar (comportamiento normal
     de un ImageField); no hace falta un control de borrado aparte. Usado
-    por el formulario de Producto."""
+    por todos los formularios del panel que suben imágenes."""
 
     template_name = "panel/includes/_widget_imagen_simple.html"
 
@@ -103,7 +95,7 @@ class PedidosImagenForm(forms.ModelForm):
             "pedidos_imagen", "pedidos_imagen_pos_x", "pedidos_imagen_pos_y", "pedidos_imagen_tamano",
         ]
         widgets = {
-            "pedidos_imagen": ImagenPortadaWidget(),
+            "pedidos_imagen": ImagenSimpleWidget(),
             "pedidos_imagen_pos_x": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "pedidos_imagen_pos_y": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "pedidos_imagen_tamano": forms.NumberInput(attrs={"step": 1, "min": 50, "max": 5000}),
@@ -138,7 +130,7 @@ class PortadaImagenForm(forms.ModelForm):
             "portada_imagen", "portada_imagen_pos_x", "portada_imagen_pos_y", "portada_imagen_zoom",
         ]
         widgets = {
-            "portada_imagen": ImagenPortadaWidget(),
+            "portada_imagen": ImagenSimpleWidget(),
             "portada_imagen_pos_x": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "portada_imagen_pos_y": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "portada_imagen_zoom": forms.NumberInput(attrs={"step": 1, "min": 100, "max": 200}),
@@ -220,26 +212,44 @@ class ProductoForm(forms.ModelForm):
         return instance
 
 
+class VarianteProductoForm(forms.ModelForm):
+    class Meta:
+        model = VarianteProducto
+        fields = ["nombre", "modalidad", "precio", "orden"]
+        widgets = {
+            "orden": forms.HiddenInput(),
+            "nombre": forms.TextInput(attrs={"placeholder": "Ej: Pequeña"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Sin modalidad es lo normal (tartas, alfajores, pastafrolas...): la
+        # opción vacía lo dice explícitamente en vez de "- Select an option -".
+        self.fields["modalidad"].choices = [("", "Sin modalidad"), *VarianteProducto.Modalidad.choices]
+
+
 VarianteProductoFormSet = inlineformset_factory(
     Producto,
     VarianteProducto,
-    fields=["nombre", "modalidad", "precio", "orden"],
-    widgets={"orden": forms.HiddenInput()},
+    form=VarianteProductoForm,
     extra=1,
     can_delete=True,
 )
 
 
 class ComboForm(forms.ModelForm):
+    """Igual que ProductoForm, no expone el slug: se genera una sola vez al
+    crear y se conserva en cada edición para no romper URLs publicadas."""
+
     class Meta:
         model = Combo
         fields = [
-            "nombre", "slug", "descripcion", "imagen",
+            "nombre", "descripcion", "imagen",
             "imagen_pos_x", "imagen_pos_y", "imagen_zoom", "precio_promocional",
         ]
         widgets = {
             "descripcion": forms.Textarea(attrs={"rows": 3}),
-            "imagen": ImagenPortadaWidget(),
+            "imagen": ImagenSimpleWidget(),
             "imagen_pos_x": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "imagen_pos_y": forms.NumberInput(attrs={"step": 1, "min": 0, "max": 100}),
             "imagen_zoom": forms.NumberInput(attrs={"step": 1, "min": 100, "max": 200}),
@@ -247,16 +257,12 @@ class ComboForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["slug"].required = False
         self.fields["imagen_pos_x"].required = False
         self.fields["imagen_pos_y"].required = False
         self.fields["imagen_zoom"].required = False
 
     def clean(self):
         cleaned = super().clean()
-        nombre = cleaned.get("nombre")
-        if nombre:
-            cleaned["slug"] = _slug_unico(Combo, nombre, cleaned.get("slug"), self.instance.pk)
         if cleaned.get("imagen_pos_x") in (None, ""):
             cleaned["imagen_pos_x"] = 50
         if cleaned.get("imagen_pos_y") in (None, ""):
@@ -265,12 +271,57 @@ class ComboForm(forms.ModelForm):
             cleaned["imagen_zoom"] = 100
         return cleaned
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if not instance.slug:
+            instance.slug = _slug_unico(Combo, instance.nombre, None, instance.pk)
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
-ComboItemFormSet = inlineformset_factory(
+
+class ComboEleccionForm(forms.ModelForm):
+    """Las opciones se eligen entre los productos activos del catálogo
+    (ej. los sabores de Tartas) en vez de escribirse a mano. El selector de
+    categoría del panel es solo de interfaz: filtra qué casillas se ven
+    (ver panel_combo_elecciones.js) y no se guarda."""
+
+    class Meta:
+        model = ComboEleccion
+        fields = ["nombre", "productos"]
+        widgets = {
+            "nombre": forms.TextInput(attrs={"placeholder": "Ej: Mini tarta"}),
+            "productos": forms.CheckboxSelectMultiple(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["productos"].queryset = (
+            Producto.objects.filter(activo=True)
+            .select_related("categoria")
+            .order_by("categoria__orden", "categoria__nombre", "nombre")
+        )
+        self.fields["productos"].label_from_instance = lambda producto: quitar_prefijo_categoria(
+            producto.nombre, producto.categoria.nombre
+        )
+        self.categorias = Categoria.objects.filter(productos__activo=True).distinct()
+        elegidos = self.instance.productos.all() if self.instance.pk else Producto.objects.none()
+        primero = elegidos.select_related("categoria").first()
+        self.categoria_inicial = primero.categoria_id if primero else None
+
+    def clean_productos(self):
+        productos = self.cleaned_data["productos"]
+        if len(productos) < 2:
+            raise forms.ValidationError("Marcá al menos dos opciones.")
+        return productos
+
+
+ComboEleccionFormSet = inlineformset_factory(
     Combo,
-    ComboItem,
-    fields=["producto", "cantidad"],
-    extra=1,
+    ComboEleccion,
+    form=ComboEleccionForm,
+    extra=2,
     can_delete=True,
 )
 

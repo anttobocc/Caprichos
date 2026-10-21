@@ -201,23 +201,21 @@ def datos_formset_variantes(variantes=None, total_forms=None):
     return datos
 
 
-def datos_formset_combo_items(items=None, total_forms=None):
+def datos_formset_combo_elecciones(elecciones=None):
     """Igual criterio que datos_formset_variantes pero para el inline de
-    productos del combo (prefix "items", campos producto/cantidad, sin
-    "orden")."""
-    items = items or []
-    if total_forms is None:
-        total_forms = len(items)
+    opciones a elección del combo (prefix "elecciones", campos
+    nombre/productos)."""
+    elecciones = elecciones or []
     datos = {
-        "items-TOTAL_FORMS": str(max(total_forms, len(items))),
-        "items-INITIAL_FORMS": "0",
-        "items-MIN_NUM_FORMS": "0",
-        "items-MAX_NUM_FORMS": "1000",
+        "elecciones-TOTAL_FORMS": str(len(elecciones)),
+        "elecciones-INITIAL_FORMS": "0",
+        "elecciones-MIN_NUM_FORMS": "0",
+        "elecciones-MAX_NUM_FORMS": "1000",
     }
-    for i, item in enumerate(items):
-        datos[f"items-{i}-producto"] = str(item.get("producto", ""))
-        datos[f"items-{i}-cantidad"] = str(item.get("cantidad", 1))
-        datos[f"items-{i}-id"] = str(item.get("id", ""))
+    for i, eleccion in enumerate(elecciones):
+        datos[f"elecciones-{i}-nombre"] = eleccion.get("nombre", "")
+        datos[f"elecciones-{i}-productos"] = [str(pk) for pk in eleccion.get("productos", [])]
+        datos[f"elecciones-{i}-id"] = str(eleccion.get("id", ""))
     return datos
 
 
@@ -482,6 +480,41 @@ class ProductoCRUDPanelTests(TestCase):
         self.assertTrue(producto.destacado)
 
 
+class PlantillasVariantesTests(TestCase):
+    def setUp(self):
+        crear_admin()
+        self.client.login(username="admin", password="clave-valida-123")
+
+    def _plantillas(self):
+        respuesta = self.client.get(reverse("panel:productos"))
+        return json.loads(respuesta.context["plantillas_variantes_json"])
+
+    def test_categoria_nueva_copia_las_variantes_de_su_primer_producto(self):
+        categoria = Categoria.objects.create(nombre="Pastafrola Test", slug="pastafrola-test")
+        self.assertEqual(self._plantillas()["categorias"][str(categoria.pk)], {"filas": [], "usa_modalidad": False})
+
+        producto = Producto.objects.create(
+            categoria=categoria, nombre="Pastafrola de membrillo", slug="pastafrola-membrillo-test", unidad_venta="unidad",
+        )
+        for orden, nombre in enumerate(["Pequeña", "Mediana", "Grande"]):
+            producto.variantes.create(nombre=nombre, precio=1000 * (orden + 1), orden=orden)
+
+        plantilla = self._plantillas()["categorias"][str(categoria.pk)]
+        self.assertFalse(plantilla["usa_modalidad"])
+        self.assertEqual([fila["nombre"] for fila in plantilla["filas"]], ["Pequeña", "Mediana", "Grande"])
+        self.assertTrue(all(fila["modalidad"] == "" for fila in plantilla["filas"]))
+
+    def test_empanadas_usa_modalidad(self):
+        categoria, _ = Categoria.objects.get_or_create(slug="empanadas", defaults={"nombre": "Empanadas"})
+        plantilla = self._plantillas()["categorias"][str(categoria.pk)]
+        self.assertTrue(plantilla["usa_modalidad"])
+        self.assertEqual(plantilla["filas"][0], {"nombre": "Unidad", "modalidad": "cocinada", "modalidad_label": "Cocinadas"})
+
+    def test_modalidad_vacia_se_muestra_como_sin_modalidad(self):
+        respuesta = self.client.get(reverse("panel:productos"))
+        self.assertContains(respuesta, '<option value="" selected>Sin modalidad</option>', html=True)
+
+
 class ImagenProductoTests(TestCase):
     def setUp(self):
         crear_admin()
@@ -551,29 +584,61 @@ class ComboCRUDPanelTests(TestCase):
         respuesta = self.client.get(reverse("panel:combo_crear"))
         self.assertEqual(respuesta.status_code, 403)
 
-    def test_admin_crea_combo_con_items(self):
+    def _crear_tartas(self, *sabores):
+        categoria = Categoria.objects.create(nombre="Tartas", slug="tartas-panel-test")
+        return [
+            Producto.objects.create(
+                categoria=categoria, nombre=f"Tarta de {sabor.lower()}", slug=f"tarta-{sabor.lower()}-panel-test",
+                unidad_venta="unidad", precio=1000,
+            )
+            for sabor in sabores
+        ]
+
+    def test_admin_crea_combo_con_opciones_a_eleccion(self):
+        frutilla, coco, inactiva = self._crear_tartas("Frutilla", "Coco", "Inactiva")
+        inactiva.activo = False
+        inactiva.save()
         datos = self._datos_combo()
-        datos.update(datos_formset_combo_items([
-            {"producto": self.producto.pk, "cantidad": 2},
+        datos.update(datos_formset_combo_elecciones([
+            {"nombre": "Mini tarta", "productos": [frutilla.pk, coco.pk]},
         ]))
         respuesta = self.client.post(reverse("panel:combo_crear"), datos)
         self.assertRedirects(respuesta, reverse("panel:combos"))
         combo = Combo.objects.get(nombre="Combo Panel Test")
         self.assertEqual(combo.precio_promocional, 3500)
         self.assertTrue(combo.activo)
-        self.assertTrue(combo.slug)
-        item = combo.items.get()
-        self.assertEqual(item.producto_id, self.producto.pk)
-        self.assertEqual(item.cantidad, 2)
+        self.assertEqual(combo.slug, "combo-panel-test")
+        eleccion = combo.elecciones.get()
+        self.assertEqual(eleccion.nombre, "Mini tarta")
+        self.assertEqual(eleccion.lista_opciones, ["Coco", "Frutilla"])
+
+    def test_opcion_a_eleccion_no_acepta_productos_inactivos(self):
+        frutilla, inactiva = self._crear_tartas("Frutilla", "Inactiva")
+        inactiva.activo = False
+        inactiva.save()
+        datos = self._datos_combo()
+        datos.update(datos_formset_combo_elecciones([
+            {"nombre": "Mini tarta", "productos": [frutilla.pk, inactiva.pk]},
+        ]))
+        respuesta = self.client.post(reverse("panel:combo_crear"), datos)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(Combo.objects.filter(nombre="Combo Panel Test").exists())
+
+    def test_opcion_a_eleccion_exige_al_menos_dos_opciones(self):
+        datos = self._datos_combo()
+        datos.update(datos_formset_combo_elecciones([
+            {"nombre": "Mini tarta", "productos": [self._crear_tartas("Frutilla")[0].pk]},
+        ]))
+        respuesta = self.client.post(reverse("panel:combo_crear"), datos)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertFalse(Combo.objects.filter(nombre="Combo Panel Test").exists())
 
     def test_admin_edita_combo_preserva_slug_al_renombrar(self):
         combo = Combo.objects.create(
             nombre="Combo Editar Test", slug="combo-editar-test", precio_promocional=1000,
         )
-        # El campo slug viaja en el POST con su valor actual (así lo manda el
-        # form real: bound field pre-completado con el valor de la instancia).
-        datos = self._datos_combo(nombre="Combo Renombrado Test", precio_promocional="1200", slug=combo.slug)
-        datos.update(datos_formset_combo_items([]))
+        datos = self._datos_combo(nombre="Combo Renombrado Test", precio_promocional="1200")
+        datos.update(datos_formset_combo_elecciones([]))
         respuesta = self.client.post(reverse("panel:combo_editar", args=[combo.pk]), datos)
         self.assertRedirects(respuesta, reverse("panel:combos"))
         combo.refresh_from_db()
@@ -608,7 +673,7 @@ class ComboCRUDPanelTests(TestCase):
         imagen = SimpleUploadedFile("combo.gif", contenido_gif, content_type="image/gif")
         datos = self._datos_combo()
         datos["imagen"] = imagen
-        datos.update(datos_formset_combo_items([]))
+        datos.update(datos_formset_combo_elecciones([]))
         respuesta = self.client.post(reverse("panel:combo_crear"), datos)
         self.assertRedirects(respuesta, reverse("panel:combos"))
         combo = Combo.objects.get(nombre="Combo Panel Test")

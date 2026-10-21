@@ -1,21 +1,21 @@
 import json
 
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from .models import Categoria, Combo, Producto
 
 
-def home(request, modo_edicion=False):
+def home(request):
     categorias = Categoria.objects.filter(activo=True, mostrar_en_inicio=True)
     destacados = Producto.objects.filter(activo=True, destacado=True).select_related("categoria")
-    combos = Combo.objects.filter(activo=True).prefetch_related("items__producto")
+    combos = Combo.objects.filter(activo=True)
     return render(request, "catalogo/home.html", {
         "categorias": categorias, "destacados": destacados, "combos": combos,
-        "modo_edicion": modo_edicion,
     })
 
 
-def lista_productos(request, modo_edicion=False):
+def lista_productos(request):
     productos = Producto.objects.filter(activo=True).select_related("categoria")
     categoria_slug = request.GET.get("categoria")
     categoria_actual = None
@@ -31,38 +31,34 @@ def lista_productos(request, modo_edicion=False):
         "combos": combos,
         "categorias": Categoria.objects.filter(activo=True, mostrar_en_productos=True),
         "categoria_actual": categoria_actual,
-        "modo_edicion": modo_edicion,
     })
 
 
-def combos_publico(request, modo_edicion=False):
-    combos = Combo.objects.filter(activo=True)
-    return render(request, "catalogo/combos_lista.html", {
-        "combos": combos,
-        "modo_edicion": modo_edicion,
-    })
+def combos_publico(request):
+    # Los combos ya se muestran en su sección del inicio: esta URL queda
+    # solo para no romper enlaces viejos y lleva directo a esa sección.
+    return redirect(f"{reverse('catalogo:home')}#combos")
 
 
-def combo_detalle(request, slug, modo_edicion=False):
-    combo = get_object_or_404(Combo.objects.prefetch_related("items__producto"), slug=slug, activo=True)
+def combo_detalle(request, slug):
+    combo = get_object_or_404(Combo.objects.prefetch_related("elecciones"), slug=slug, activo=True)
     return render(request, "catalogo/combo_detalle.html", {
         "combo": combo,
-        "modo_edicion": modo_edicion,
     })
 
 
-def categoria_detalle(request, slug, modo_edicion=False):
+def categoria_detalle(request, slug):
     categoria = get_object_or_404(Categoria, slug=slug, activo=True, mostrar_en_productos=True)
     productos = categoria.productos.filter(activo=True)
     return render(request, "catalogo/categoria_detalle.html", {
-        "categoria": categoria, "productos": productos, "modo_edicion": modo_edicion,
+        "categoria": categoria, "productos": productos,
     })
 
 
-def producto_detalle(request, slug, modo_edicion=False):
+def producto_detalle(request, slug):
     producto = get_object_or_404(Producto.objects.select_related("categoria"), slug=slug, activo=True)
     variantes = producto.variantes.filter(activo=True) if producto.tiene_variantes else None
-    contexto = {"producto": producto, "variantes": variantes, "modo_edicion": modo_edicion}
+    contexto = {"producto": producto, "variantes": variantes}
 
     if variantes is not None and producto.tiene_modalidad:
         # Empanadas y cualquier otro producto con dos ejes de compra

@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import models
 from django.http import JsonResponse
@@ -12,14 +11,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 
-from catalogo import views as catalogo_views
-from catalogo.models import Categoria, Combo, Producto
+from catalogo.models import Categoria, Combo, Producto, VarianteProducto
 from pedidos.models import Pedido
 
 from .forms import (
     CategoriaForm,
     ComboForm,
-    ComboItemFormSet,
+    ComboEleccionFormSet,
     ConfiguracionNegocioForm,
     PedidoEstadoForm,
     PedidosImagenForm,
@@ -38,8 +36,10 @@ FILAS_POR_PAGINA = 20
 # modalidad para productos con dos ejes de compra como Empanadas). Al crear
 # un producto nuevo, el panel prellena estas filas en JS según la categoría
 # elegida; el administrador solo completa el precio de cada combinación.
-# No es una tabla editable en base de datos: son reglas de negocio fijas
-# (ver los distintos tipos de producto de Capricho), igual que unidad_venta.
+# Primero se copian las variantes del último producto cargado en esa
+# categoría (así una categoría nueva, como Pastafrola, "aprende" sus
+# tamaños del primer producto que se carga); este diccionario es solo el
+# punto de partida para categorías que todavía no tienen productos.
 PLANTILLAS_VARIANTES_POR_CATEGORIA = {
     "empanadas": {
         "cantidades": ["Unidad", "Media docena", "Docena"],
@@ -62,16 +62,41 @@ def _plantilla_variantes(categoria_slug):
         return []
     modalidades = plantilla["modalidades"] or [("", "")]
     return [
-        {"nombre": cantidad, "modalidad": valor}
+        {"nombre": cantidad, "modalidad": valor, "modalidad_label": etiqueta}
         for cantidad in plantilla["cantidades"]
-        for valor, _etiqueta in modalidades
+        for valor, etiqueta in modalidades
+    ]
+
+
+def _plantilla_desde_productos(categoria):
+    """Variantes activas del producto más reciente de la categoría que
+    tenga variantes, en su orden, sin precios."""
+    producto = (
+        Producto.objects.filter(categoria=categoria, variantes__activo=True)
+        .order_by("-fecha_creacion")
+        .first()
+    )
+    if producto is None:
+        return []
+    return [
+        {"nombre": v.nombre, "modalidad": v.modalidad, "modalidad_label": v.get_modalidad_display() if v.modalidad else ""}
+        for v in producto.variantes.filter(activo=True).order_by("orden", "pk")
     ]
 
 
 def _plantillas_variantes_json():
+    categorias = {}
+    for categoria in Categoria.objects.all():
+        filas = _plantilla_desde_productos(categoria) or _plantilla_variantes(categoria.slug)
+        categorias[categoria.pk] = {
+            "filas": filas,
+            # La columna Modalidad (Cocinadas/Congeladas) solo se muestra en
+            # categorías que la usan; en el resto queda oculta y vacía.
+            "usa_modalidad": any(fila["modalidad"] for fila in filas),
+        }
     return json.dumps({
-        categoria.pk: _plantilla_variantes(categoria.slug)
-        for categoria in Categoria.objects.all()
+        "categorias": categorias,
+        "modalidades": [[valor, etiqueta] for valor, etiqueta in VarianteProducto.Modalidad.choices],
     })
 
 
@@ -525,15 +550,15 @@ def configuracion(request):
 
 @panel_admin_required
 def combos_lista(request):
-    combos = Combo.objects.order_by("nombre").prefetch_related("items__producto")
+    combos = Combo.objects.order_by("nombre").prefetch_related("elecciones")
     pagina = _paginar(request, combos)
     for combo in pagina:
         combo.form_editar = ComboForm(instance=combo, auto_id=f"id_combo_{combo.pk}_%s")
-        combo.formset_editar = ComboItemFormSet(instance=combo, prefix="items", auto_id=f"id_combo_{combo.pk}_%s")
+        combo.formset_editar = ComboEleccionFormSet(instance=combo, prefix="elecciones", auto_id=f"id_combo_{combo.pk}_%s")
     return render(request, "panel/combos_lista.html", {
         "combos": pagina,
         "form_crear": ComboForm(),
-        "formset_crear": ComboItemFormSet(prefix="items"),
+        "formset_crear": ComboEleccionFormSet(prefix="elecciones"),
     })
 
 
@@ -541,7 +566,7 @@ def combos_lista(request):
 def combo_crear(request):
     if request.method == "POST":
         form = ComboForm(request.POST, request.FILES)
-        formset = ComboItemFormSet(request.POST, prefix="items")
+        formset = ComboEleccionFormSet(request.POST, prefix="elecciones")
         if form.is_valid() and formset.is_valid():
             combo = form.save()
             formset.instance = combo
@@ -550,7 +575,7 @@ def combo_crear(request):
             return redirect("panel:combos")
     else:
         form = ComboForm()
-        formset = ComboItemFormSet(prefix="items")
+        formset = ComboEleccionFormSet(prefix="elecciones")
     return render(request, "panel/combo_form.html", {"form": form, "formset": formset, "modo": "crear"})
 
 
@@ -559,7 +584,7 @@ def combo_editar(request, pk):
     combo = get_object_or_404(Combo, pk=pk)
     if request.method == "POST":
         form = ComboForm(request.POST, request.FILES, instance=combo)
-        formset = ComboItemFormSet(request.POST, instance=combo, prefix="items")
+        formset = ComboEleccionFormSet(request.POST, instance=combo, prefix="elecciones")
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -567,7 +592,7 @@ def combo_editar(request, pk):
             return redirect("panel:combos")
     else:
         form = ComboForm(instance=combo)
-        formset = ComboItemFormSet(instance=combo, prefix="items")
+        formset = ComboEleccionFormSet(instance=combo, prefix="elecciones")
     return render(request, "panel/combo_form.html", {
         "form": form, "formset": formset, "modo": "editar", "combo": combo,
     })
@@ -592,110 +617,3 @@ def combo_eliminar(request, pk):
     combo.delete()
     messages.success(request, f'El combo "{nombre}" fue eliminado.')
     return redirect("panel:combos")
-
-
-# ===== Preview real con modo edición de imágenes =====
-# Estas vistas NO duplican lógica: llaman directamente a las vistas públicas
-# de catalogo/views.py (mismo template, mismo CSS, mismo contexto) pidiendo
-# modo_edicion=True. Las URLs públicas normales nunca pasan ese parámetro,
-# así que un cliente agregando ?edit=1 a la home no logra nada: ese query
-# param no lo lee ninguna vista pública, solo estas de acá, que ya están
-# detrás de @panel_admin_required.
-
-@panel_admin_required
-def preview_home(request):
-    return catalogo_views.home(request, modo_edicion=True)
-
-
-@panel_admin_required
-def preview_productos(request):
-    return catalogo_views.lista_productos(request, modo_edicion=True)
-
-
-@panel_admin_required
-def preview_categoria(request, slug):
-    return catalogo_views.categoria_detalle(request, slug, modo_edicion=True)
-
-
-@panel_admin_required
-def preview_producto(request, slug):
-    return catalogo_views.producto_detalle(request, slug, modo_edicion=True)
-
-
-@panel_admin_required
-def preview_combo(request, slug):
-    return catalogo_views.combo_detalle(request, slug, modo_edicion=True)
-
-
-# Lista blanca de qué se puede editar desde la preview: entidad -> (modelo,
-# lookup por pk o "singleton", {prefijo_de_campo: modo}). No se acepta
-# ningún otro nombre de entidad/prefijo, ni siquiera si el modelo tuviera
-# más campos de imagen en el futuro sin agregarlos acá explícitamente.
-_ENTIDADES_EDITABLES = {
-    "categoria": (Categoria, "pk", {"imagen": "flotante", "imagen_mobile": "flotante-movil"}),
-    "producto": (Producto, "pk", {"imagen": "recorte"}),
-    "combo": (Combo, "pk", {"imagen": "recorte"}),
-    "configuracion": (ConfiguracionNegocio, "singleton", {
-        "pedidos_imagen": "flotante",
-        "pedidos_imagen_mobile": "flotante-movil",
-        "portada_imagen": "recorte",
-    }),
-}
-
-
-@panel_admin_required
-@require_POST
-def preview_guardar_imagen(request):
-    try:
-        datos = json.loads(request.body)
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return JsonResponse({"ok": False, "error": "Cuerpo de la petición inválido."}, status=400)
-
-    entidad = datos.get("entidad")
-    prefijo = datos.get("prefijo")
-    entrada = _ENTIDADES_EDITABLES.get(entidad)
-    if not entrada:
-        return JsonResponse({"ok": False, "error": "Entidad no editable."}, status=400)
-
-    modelo, lookup, prefijos_validos = entrada
-    modo = prefijos_validos.get(prefijo)
-    if not modo:
-        return JsonResponse({"ok": False, "error": "Campo no editable para esta entidad."}, status=400)
-
-    if lookup == "singleton":
-        instancia = modelo.get_solo()
-    else:
-        instancia = get_object_or_404(modelo, pk=datos.get("id"))
-
-    campo_x = f"{prefijo}_pos_x"
-    campo_y = f"{prefijo}_pos_y"
-    # "recorte" (portada/producto/combo) guarda el tercer valor como zoom;
-    # los dos modos "flotante" (desktop y mobile) lo guardan como tamaño.
-    campo_tercero = f"{prefijo}_zoom" if modo == "recorte" else f"{prefijo}_tamano"
-
-    try:
-        valor_x = int(datos.get("pos_x"))
-        valor_y = int(datos.get("pos_y"))
-        valor_tercero = int(datos.get("valor"))
-    except (TypeError, ValueError):
-        return JsonResponse({"ok": False, "error": "Los valores de posición/zoom deben ser numéricos."}, status=400)
-
-    errores = {}
-    for nombre_campo, valor in ((campo_x, valor_x), (campo_y, valor_y), (campo_tercero, valor_tercero)):
-        try:
-            modelo._meta.get_field(nombre_campo).run_validators(valor)
-        except ValidationError as error:
-            errores[nombre_campo] = error.messages
-
-    if errores:
-        return JsonResponse({"ok": False, "error": "Valores fuera de rango.", "detalles": errores}, status=400)
-
-    setattr(instancia, campo_x, valor_x)
-    setattr(instancia, campo_y, valor_y)
-    setattr(instancia, campo_tercero, valor_tercero)
-    instancia.save(update_fields=[campo_x, campo_y, campo_tercero])
-
-    return JsonResponse({
-        "ok": True,
-        "pos_x": valor_x, "pos_y": valor_y, "valor": valor_tercero,
-    })

@@ -1,0 +1,203 @@
+/* =====================================================================
+   Capa de movimiento del sitio público (ver static/js/movimiento.js).
+
+   Cada animación tiene un motivo:
+   - Portada: el texto entra escalonado y la foto se asienta, una sola vez
+     al cargar (primera impresión, no se repite).
+   - Secciones y tarjetas: aparecen al entrar en pantalla, escalonadas,
+     para que la vista siga el orden de lectura.
+   - Hover en tarjetas: se elevan y la foto se acerca apenas, para indicar
+     que son clickeables.
+   - Botones y chips: se achican un poco al presionarlos (confirma el clic).
+   - Contador del carrito: "salta" cuando cambia (confirma que se agregó).
+
+   Solo se animan transform/translate/scale/opacity. Las fotos ya usan
+   "transform" para el encuadre que se ajusta desde el panel, así que el
+   movimiento usa las propiedades individuales "translate" y "scale", que
+   se suman a ese transform sin pisarlo.
+   ===================================================================== */
+
+:root {
+    --mov-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ---------- Feedback al presionar (siempre, también en celular) ---------- */
+.boton,
+.chip {
+    transition:
+        background-color 200ms ease,
+        color 200ms ease,
+        border-color 200ms ease,
+        scale 160ms var(--mov-ease-out);
+}
+
+.boton:active,
+.chip:active {
+    scale: 0.97;
+}
+
+/* ---------- Contador del carrito ---------- */
+.icono-accion__contador--salto {
+    animation: mov-contador 420ms var(--mov-ease-out);
+}
+
+@keyframes mov-contador {
+    0% { scale: 1; }
+    35% { scale: 1.3; }
+    100% { scale: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+    /* ---------- Portada (desktop) ---------- */
+    .hero__texto > * {
+        animation: mov-subir 700ms var(--mov-ease-out) both;
+    }
+
+    .hero__texto > :nth-child(2) { animation-delay: 70ms; }
+    .hero__texto > :nth-child(3) { animation-delay: 140ms; }
+    .hero__texto > :nth-child(4) { animation-delay: 210ms; }
+    .hero__texto > :nth-child(5) { animation-delay: 280ms; }
+
+    .hero__imagen-marco img {
+        animation: mov-asentar 1400ms var(--mov-ease-out) both;
+    }
+
+    .hero__flores {
+        animation: mov-aparecer 1000ms ease-out 200ms both;
+    }
+
+    @keyframes mov-subir {
+        from { opacity: 0; translate: 0 14px; }
+        to { opacity: 1; translate: 0 0; }
+    }
+
+    @keyframes mov-asentar {
+        from { opacity: 0; scale: 1.06; }
+        to { opacity: 1; scale: 1; }
+    }
+
+    @keyframes mov-aparecer {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* ---------- Aparición al hacer scroll ----------
+       "con-js" lo agrega un script en el <head>, así que sin JavaScript
+       todo se ve normal. La lista de selectores es la misma que
+       SELECTORES en movimiento.js: el CSS los oculta desde el primer
+       pintado y el JS les agrega "revelado" al entrar en pantalla (y
+       --mov-i para escalonar). */
+    .con-js :is(.seccion-titulo, .categoria-card, .producto-card, .m-card, .producto-detalle__imagen, .producto-detalle__info, .pagina-listado h1, .categorias-nav) {
+        opacity: 0;
+        translate: 0 18px;
+        transition:
+            opacity 600ms var(--mov-ease-out) calc(var(--mov-i, 0) * 70ms),
+            translate 700ms var(--mov-ease-out) calc(var(--mov-i, 0) * 70ms);
+    }
+
+    .con-js :is(.seccion-titulo, .categoria-card, .producto-card, .m-card, .producto-detalle__imagen, .producto-detalle__info, .pagina-listado h1, .categorias-nav).revelado {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Movimiento reducido: sin desplazamientos, solo un fundido corto. */
+    .con-js :is(.seccion-titulo, .categoria-card, .producto-card, .m-card, .producto-detalle__imagen, .producto-detalle__info, .pagina-listado h1, .categorias-nav) {
+        opacity: 0;
+        transition: opacity 300ms ease;
+    }
+
+    .con-js :is(.seccion-titulo, .categoria-card, .producto-card, .m-card, .producto-detalle__imagen, .producto-detalle__info, .pagina-listado h1, .categorias-nav).revelado {
+        opacity: 1;
+    }
+
+    .boton:active,
+    .chip:active {
+        scale: none;
+    }
+
+    .icono-accion__contador--salto {
+        animation: none;
+    }
+}
+
+/* ---------- Hover (solo con mouse: en celular el toque no lo dispara) ---------- */
+@media (hover: hover) and (pointer: fine) {
+    .producto-card,
+    .categoria-card {
+        transition:
+            transform 280ms var(--mov-ease-out),
+            box-shadow 280ms ease;
+    }
+
+    /* Las tarjetas reveladas tienen además su propia transición de
+       aparición; se combinan acá para que una no anule a la otra. */
+    .con-js .producto-card,
+    .con-js .categoria-card {
+        transition:
+            opacity 600ms var(--mov-ease-out) calc(var(--mov-i, 0) * 70ms),
+            translate 700ms var(--mov-ease-out) calc(var(--mov-i, 0) * 70ms),
+            transform 280ms var(--mov-ease-out),
+            box-shadow 280ms ease;
+    }
+
+    .producto-card:hover,
+    .categoria-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 32px -20px rgba(59, 46, 38, 0.45);
+    }
+
+    .producto-card__imagen-link img,
+    .categoria-card__imagen img {
+        transition: scale 600ms var(--mov-ease-out);
+    }
+
+    .producto-card:hover .producto-card__imagen-link img {
+        scale: 1.05;
+    }
+
+    .categoria-card:hover .categoria-card__imagen img {
+        scale: 1.04;
+    }
+
+    /* Links del menú: una línea que crece desde la izquierda. */
+    .site-nav:not(.site-nav--mobile) a {
+        position: relative;
+        transition: color 200ms ease;
+    }
+
+    .site-nav:not(.site-nav--mobile) a::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -4px;
+        height: 1px;
+        background: currentColor;
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 250ms var(--mov-ease-out);
+    }
+
+    .site-nav:not(.site-nav--mobile) a:hover::before {
+        transform: scaleX(1);
+    }
+
+    .icono-accion {
+        transition: color 200ms ease;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+    .producto-card:hover,
+    .categoria-card:hover {
+        transform: none;
+    }
+
+    .producto-card:hover .producto-card__imagen-link img,
+    .categoria-card:hover .categoria-card__imagen img {
+        scale: none;
+    }
+}

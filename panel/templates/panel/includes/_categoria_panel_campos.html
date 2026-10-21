@@ -1,13 +1,13 @@
 {% comment %}
 Cuerpo del panel de Categoría: Nombre, Descripción, Imagen de portada y el
-editor visual de posición/tamaño (arrastrar, botones −/+/↑/↓ y campos
-numéricos) — sin tocar esa lógica, sigue sincronizada por
+editor visual de posición (solo arrastrar; X/Y/tamaño van como campos
+ocultos y el tamaño se ajusta desde el código), sincronizado por
 static/js/panel_categoria_imagen.js. No se muestra el slug (se autogenera
 desde el nombre, ver CategoriaForm._slug_unico) ni "orden" (se arrastra y
 suelta en la lista, ver panel_categorias_orden.js).
 
-Presentación con encabezados de sección (ícono + título) y cajas para
-Posición X/Y y Visibilidad — ver "admin-seccion-titulo"/"admin-imagen-caja"/
+Presentación con encabezados de sección (ícono + título) y caja de
+Visibilidad — ver "admin-seccion-titulo"/"admin-imagen-caja"/
 "admin-visibilidad-fila" en panel.css. Estas clases son propias de este
 formulario (no las usan producto/portada/pedidos, que reutilizan el mismo
 "data-imagen-editor"/ImagenSimpleWidget con su presentación original) para
@@ -33,7 +33,7 @@ no alterar esos otros formularios.
         {% for error in form.imagen_categoria.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
     </div>
 
-    <span class="admin-field__ayuda">Arrastrá la imagen o usá los controles para elegir qué parte queda visible en la portada.</span>
+    <span class="admin-field__ayuda">Arrastrá la imagen para ubicarla en la tarjeta.</span>
     <div class="admin-imagen-editor__lienzo" data-lienzo>
         <img
             data-imagen-preview
@@ -46,38 +46,9 @@ no alterar esos otros formularios.
         <span class="admin-imagen-editor__vacio" data-imagen-vacio {% if categoria.imagen_categoria %}hidden{% endif %}>Elegí una imagen para previsualizarla acá</span>
     </div>
 
-    <div class="admin-imagen-caja">
-        <div class="admin-imagen-editor__eje">
-            <span class="admin-imagen-editor__eje-label">Posición X</span>
-            <div class="admin-imagen-editor__controles">
-                <button type="button" class="admin-imagen-editor__boton" data-ajustar-x="-1" aria-label="Mover imagen a la izquierda">−</button>
-                {{ form.imagen_pos_x }}
-                <button type="button" class="admin-imagen-editor__boton" data-ajustar-x="1" aria-label="Mover imagen a la derecha">+</button>
-            </div>
-            {% for error in form.imagen_pos_x.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
-        </div>
-
-        <div class="admin-imagen-caja__divisor" aria-hidden="true"></div>
-
-        <div class="admin-imagen-editor__eje">
-            <span class="admin-imagen-editor__eje-label">Posición Y</span>
-            <div class="admin-imagen-editor__controles">
-                <button type="button" class="admin-imagen-editor__boton" data-ajustar-y="-1" aria-label="Mover imagen hacia arriba">↑</button>
-                {{ form.imagen_pos_y }}
-                <button type="button" class="admin-imagen-editor__boton" data-ajustar-y="1" aria-label="Mover imagen hacia abajo">↓</button>
-            </div>
-            {% for error in form.imagen_pos_y.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
-        </div>
-    </div>
-
-    <div class="admin-imagen-editor__eje">
-        <span class="admin-imagen-editor__eje-label">Tamaño</span>
-        <div class="admin-imagen-editor__controles admin-imagen-editor__controles--tamano">
-            <input type="range" min="50" max="5000" step="1" value="{{ categoria.imagen_tamano|default:260 }}" data-tamano-slider>
-            {{ form.imagen_tamano }}
-        </div>
-        {% for error in form.imagen_tamano.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
-    </div>
+    {{ form.imagen_pos_x.as_hidden }}
+    {{ form.imagen_pos_y.as_hidden }}
+    {{ form.imagen_tamano.as_hidden }}
 </div>
 
 <hr class="admin-divisor">

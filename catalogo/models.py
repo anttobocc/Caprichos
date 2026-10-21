@@ -53,9 +53,7 @@ class Categoria(models.Model):
     # la tarjeta (.m-card, no .m-card__imagen): X/Y pueden salir de 0-100
     # (con SmallIntegerField, no Positive) para poder arrastrarla bien
     # afuera de la tarjeta hacia cualquier lado, y el tamaño no tiene techo
-    # atado al recuadro. Mismo prefijo "imagen_mobile" para que
-    # panel/views.py::preview_guardar_imagen los siga tratando con la
-    # misma lógica genérica (modo "flotante-movil").
+    # atado al recuadro.
     imagen_mobile_pos_x = models.SmallIntegerField(
         verbose_name="posición horizontal mobile (X)",
         default=50,
@@ -222,7 +220,7 @@ class Combo(models.Model):
         validators=[MinValueValidator(100), MaxValueValidator(200)],
         help_text="Escala de la imagen dentro de su recuadro, en % (100 = ajuste normal).",
     )
-    precio_promocional = models.DecimalField(max_digits=10, decimal_places=2)
+    precio_promocional = models.DecimalField(verbose_name="precio", max_digits=10, decimal_places=2)
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
@@ -263,3 +261,35 @@ class ComboItem(models.Model):
 
     def __str__(self):
         return f"{self.cantidad} x {self.producto.nombre} ({self.combo.nombre})"
+
+
+class ComboEleccion(models.Model):
+    """Un producto "a elección" dentro de un combo (ej. "Mini tarta"), con
+    los productos del catálogo entre los que elige el cliente al agregarlo
+    al carrito (ej. los sabores de Tartas)."""
+
+    combo = models.ForeignKey(Combo, on_delete=models.CASCADE, related_name="elecciones")
+    nombre = models.CharField(max_length=100)
+    productos = models.ManyToManyField(Producto, related_name="elecciones_combo", blank=True, verbose_name="opciones")
+
+    class Meta:
+        verbose_name = "opción a elección del combo"
+        verbose_name_plural = "opciones a elección del combo"
+        ordering = ["pk"]
+
+    def __str__(self):
+        return f"{self.nombre} ({self.combo.nombre})"
+
+    @property
+    def lista_opciones(self):
+        """Nombres de las opciones que el cliente puede elegir hoy: solo
+        productos activos y disponibles, sin repetir la categoría
+        ("Tarta de coco" -> "Coco")."""
+        from .templatetags.catalogo_extras import quitar_prefijo_categoria
+
+        productos = (
+            self.productos.filter(activo=True, disponible=True)
+            .select_related("categoria")
+            .order_by("categoria__orden", "nombre")
+        )
+        return [quitar_prefijo_categoria(p.nombre, p.categoria.nombre) for p in productos]

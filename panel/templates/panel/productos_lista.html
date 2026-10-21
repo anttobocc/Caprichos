@@ -61,7 +61,6 @@
                             <td data-label="Estado">{% include "panel/includes/_switch.html" with accion_url=url_toggle activo=producto.activo %}</td>
                             <td class="admin-table__acciones">
                                 <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-panel-target="#panel-producto-{{ producto.pk }}">Editar</button>
-                                <a href="{% url 'panel:preview_producto' producto.slug %}" class="admin-btn admin-btn--secondary admin-btn--sm">Vista previa ✎</a>
                                 <button type="button" class="admin-btn admin-btn--danger admin-btn--sm" data-modal-target="#modal-eliminar-producto-{{ producto.pk }}">Eliminar</button>
                             </td>
                         </tr>

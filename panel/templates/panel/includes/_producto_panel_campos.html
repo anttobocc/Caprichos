@@ -8,6 +8,10 @@ Formulario deliberadamente compacto: no incluye slug, descripción (corta
 ni larga), ni el estado activo/inactivo del producto (ver
 [[panel-productos-form-compacto]]). El orden va:
 Categoría/Nombre, Precio/Unidad, Variantes, Destacado, Imagen.
+
+Modalidad (Cocinadas/Congeladas) solo se muestra en categorías que la usan
+(hoy Empanadas y Pizza); en el resto la columna se oculta y queda vacía.
+Ver static/js/panel_variantes.js.
 {% endcomment %}
 <div class="admin-producto-form__fila">
     {% include "panel/includes/_campo.html" with field=form.categoria %}
@@ -21,7 +25,7 @@ Categoría/Nombre, Precio/Unidad, Variantes, Destacado, Imagen.
 
 <div class="admin-panel-form__seccion admin-variantes" data-variantes-seccion>
     <h3>Variantes</h3>
-    <p class="admin-field__ayuda">Un producto sin variantes debe tener un precio. Un producto con variantes debe tener el precio del producto vacío: cada variante define el suyo. Arrastrá ⠿⠿ para reordenarlas.</p>
+    <p class="admin-field__ayuda">Usá variantes cuando el producto se vende en distintos tamaños o cantidades, cada uno con su precio (en ese caso dejá vacío el precio del producto). Al elegir la categoría se cargan las mismas variantes que ya usan sus otros productos. Arrastrá ⠿⠿ para reordenarlas.</p>
 
     {{ formset.management_form }}
     {% if formset.non_form_errors %}
@@ -35,18 +39,18 @@ Categoría/Nombre, Precio/Unidad, Variantes, Destacado, Imagen.
             {{ variante_form.orden }}
             <button type="button" class="admin-variante-fila__handle" data-arrastrar aria-label="Arrastrar para reordenar">⠿⠿</button>
 
-            <div class="admin-variante-fila__campo">
-                <label>Modalidad</label>
-                {{ variante_form.modalidad }}
-                {% for error in variante_form.modalidad.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
-            </div>
-            <div class="admin-variante-fila__campo">
-                <label>Cantidad</label>
+            <div class="admin-variante-fila__campo admin-variante-fila__campo--nombre">
+                <label for="{{ variante_form.nombre.id_for_label }}">Variante</label>
                 {{ variante_form.nombre }}
                 {% for error in variante_form.nombre.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
             </div>
-            <div class="admin-variante-fila__campo">
-                <label>Precio</label>
+            <div class="admin-variante-fila__campo admin-variante-fila__campo--modalidad">
+                <label for="{{ variante_form.modalidad.id_for_label }}">Modalidad</label>
+                {{ variante_form.modalidad }}
+                {% for error in variante_form.modalidad.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="admin-variante-fila__campo admin-variante-fila__campo--precio">
+                <label for="{{ variante_form.precio.id_for_label }}">Precio</label>
                 {{ variante_form.precio }}
                 {% for error in variante_form.precio.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
             </div>
@@ -61,6 +65,13 @@ Categoría/Nombre, Precio/Unidad, Variantes, Destacado, Imagen.
             {% endif %}
         </div>
         {% endfor %}
+    </div>
+
+    <div class="admin-variantes__acciones">
+        <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-variante-agregar>+ Agregar variante</button>
+        <span class="admin-variantes__atajos-label">Atajos:</span>
+        <button type="button" class="admin-variantes__atajo" data-variante-atajo="Pequeña|Mediana|Grande">Pequeña, Mediana, Grande</button>
+        <button type="button" class="admin-variantes__atajo" data-variante-atajo="Media docena|Docena">Media docena, Docena</button>
     </div>
 </div>
 

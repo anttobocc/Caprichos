@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.text import slugify
 
 from catalogo.models import Categoria, Combo, Producto, VarianteProducto
 from panel.models import ConfiguracionNegocio
@@ -44,6 +45,26 @@ def crear_combo(**kwargs):
     }
     datos.update(kwargs)
     return Combo.objects.create(**datos)
+
+
+def crear_eleccion(combo, nombre, sabores, categoria_nombre="Tartas"):
+    """Crea una opción a elección con un producto activo por sabor, dentro
+    de la categoría indicada (ej. "Tarta de frutilla" en "Tartas", que se
+    muestra al cliente como "Frutilla")."""
+    categoria, _ = Categoria.objects.get_or_create(
+        nombre=categoria_nombre, defaults={"slug": slugify(categoria_nombre)},
+    )
+    singular = categoria_nombre.rstrip("s")
+    productos = [
+        Producto.objects.create(
+            categoria=categoria, nombre=f"{singular} de {sabor.lower()}",
+            slug=slugify(f"{singular}-{sabor}-{combo.pk}-{nombre}"), unidad_venta="unidad", precio=1000,
+        )
+        for sabor in sabores
+    ]
+    eleccion = combo.elecciones.create(nombre=nombre)
+    eleccion.productos.set(productos)
+    return eleccion
 
 
 def fecha_valida(dias_extra=0):
@@ -255,6 +276,44 @@ class CarritoComboTests(TestCase):
         self.client.post(reverse("pedidos:carrito_agregar_combo", args=[combo.pk]), {"cantidad": 1})
         combo.activo = False
         combo.save(update_fields=["activo"])
+        respuesta = self.client.get(reverse("pedidos:carrito"))
+        self.assertEqual(len(respuesta.context["lineas"]), 0)
+
+    def test_agregar_combo_con_opciones_a_eleccion(self):
+        combo = crear_combo(slug="combo-con-elecciones-test")
+        tarta = crear_eleccion(combo, "Mini tarta", ["Frutilla", "Limón"])
+        budin = crear_eleccion(combo, "Mini budín", ["Vainilla", "Chocolate"], categoria_nombre="Budines")
+        url = reverse("pedidos:carrito_agregar_combo", args=[combo.pk])
+        self.client.post(url, {"cantidad": 1, f"eleccion_{tarta.pk}": "Limón", f"eleccion_{budin.pk}": "Chocolate"})
+        self.client.post(url, {"cantidad": 1, f"eleccion_{tarta.pk}": "Frutilla", f"eleccion_{budin.pk}": "Chocolate"})
+        self.client.post(url, {"cantidad": 2, f"eleccion_{tarta.pk}": "Limón", f"eleccion_{budin.pk}": "Chocolate"})
+        respuesta = self.client.get(reverse("pedidos:carrito"))
+        lineas = respuesta.context["lineas"]
+        # Mismas opciones suman cantidad; opciones distintas son otra línea.
+        self.assertEqual(len(lineas), 2)
+        self.assertEqual(lineas[0].cantidad, 3)
+        self.assertEqual(lineas[0].detalle, "Mini tarta: Limón · Mini budín: Chocolate")
+        self.assertEqual(lineas[1].detalle, "Mini tarta: Frutilla · Mini budín: Chocolate")
+
+    def test_opcion_invalida_no_agrega_combo(self):
+        combo = crear_combo(slug="combo-opcion-invalida-test")
+        tarta = crear_eleccion(combo, "Mini tarta", ["Frutilla", "Limón"])
+        url = reverse("pedidos:carrito_agregar_combo", args=[combo.pk])
+        self.client.post(url, {"cantidad": 1, f"eleccion_{tarta.pk}": "Coco"})
+        self.client.post(url, {"cantidad": 1})
+        respuesta = self.client.get(reverse("pedidos:carrito"))
+        self.assertEqual(len(respuesta.context["lineas"]), 0)
+
+    def test_combo_se_quita_si_cambian_sus_opciones(self):
+        combo = crear_combo(slug="combo-opciones-cambian-test")
+        tarta = crear_eleccion(combo, "Mini tarta", ["Frutilla", "Limón"])
+        self.client.post(
+            reverse("pedidos:carrito_agregar_combo", args=[combo.pk]),
+            {"cantidad": 1, f"eleccion_{tarta.pk}": "Limón"},
+        )
+        producto_limon = tarta.productos.get(nombre="Tarta de limón")
+        producto_limon.activo = False
+        producto_limon.save()
         respuesta = self.client.get(reverse("pedidos:carrito"))
         self.assertEqual(len(respuesta.context["lineas"]), 0)
 
@@ -504,6 +563,22 @@ class CreacionPedidoTests(TestCase):
         self.assertEqual(item.precio_unitario, 3500)
         self.assertEqual(item.nombre_producto, "Combo Checkout Test")
         self.assertEqual(item.subtotal, 7000)
+
+    def test_pedido_de_combo_guarda_opciones_elegidas(self):
+        combo = crear_combo(nombre="Combo Elegido Test", slug="combo-elegido-test", precio_promocional=3500)
+        tarta = crear_eleccion(combo, "Mini tarta", ["Frutilla", "Limón"])
+        self.client.post(
+            reverse("pedidos:carrito_agregar_combo", args=[combo.pk]),
+            {"cantidad": 1, f"eleccion_{tarta.pk}": "Limón"},
+        )
+        datos = {
+            "nombre_completo": "Ana Test", "telefono": "111222333",
+            "tipo_entrega": "retiro", "direccion_envio": "", "fecha_pedido": fecha_valida(), "observaciones": "",
+        }
+        self.client.post(reverse("pedidos:checkout"), datos)
+        item = ItemPedido.objects.get()
+        self.assertEqual(item.nombre_variante, "Mini tarta: Limón")
+        self.assertIn("Combo Elegido Test (Mini tarta: Limón)", whatsapp.construir_mensaje(item.pedido))
 
     def test_no_crea_pedido_si_hay_producto_no_disponible(self):
         producto = crear_producto(self.categoria)

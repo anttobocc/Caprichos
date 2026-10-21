@@ -2,7 +2,7 @@
 <article class="producto-card">
     <a href="{% url 'catalogo:combo_detalle' combo.slug %}" class="producto-card__imagen-link">
         {% if combo.imagen %}
-            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};"{% if modo_edicion %} data-editable-imagen data-entidad="combo" data-id="{{ combo.pk }}" data-prefijo="imagen" data-modo="recorte" data-nombre="{{ combo.nombre }}"{% endif %}>
+            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};">
         {% else %}
             <div class="producto-card__sin-imagen" aria-hidden="true">🎁</div>
         {% endif %}
@@ -11,10 +11,6 @@
         <p class="producto-card__categoria">Combo</p>
         <h3><a href="{% url 'catalogo:combo_detalle' combo.slug %}">{{ combo.nombre }}</a></h3>
         {% if combo.descripcion %}<p class="producto-card__descripcion">{{ combo.descripcion|linebreaksbr }}</p>{% endif %}
-
-        {% if combo.precio_individual_total %}
-            <p class="producto-card__unidad"><s>${{ combo.precio_individual_total }}</s></p>
-        {% endif %}
         <p class="producto-card__precio">${{ combo.precio_promocional }}</p>
 
         <a href="{% url 'catalogo:combo_detalle' combo.slug %}" class="boton producto-card__boton">Ver combo</a>

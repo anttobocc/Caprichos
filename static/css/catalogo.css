@@ -888,6 +888,36 @@
     font-size: 0.9rem;
 }
 
+/* Opciones a elección de un combo: un desplegable por producto. */
+.producto-detalle__eleccion {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+}
+
+.producto-detalle__select {
+    width: 100%;
+    padding: 10px 40px 10px 14px;
+    border: 1px solid var(--color-beige);
+    border-radius: 999px;
+    background-color: var(--color-blanco-calido);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%237a6a5c' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    color: var(--color-marron);
+    font: inherit;
+    font-size: 0.95rem;
+    appearance: none;
+    cursor: pointer;
+}
+
+.producto-detalle__select:focus {
+    outline: none;
+    border-color: var(--color-terracota);
+    box-shadow: 0 0 0 3px rgba(193, 102, 63, 0.15);
+}
+
 /* ===== Footer ===== */
 .site-footer {
     background: var(--color-oliva-oscuro);
@@ -1013,6 +1043,13 @@
     background: rgba(250, 243, 232, 0.4);
 }
 
+/* Movimiento del footer: solo transform/opacity/colores, con curvas
+   ease-out fuertes. Hover detrás de (hover: hover) para que en celulares
+   el toque no deje el botón "pegado" en estado hover. */
+.site-footer {
+    --footer-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 .site-footer__whatsapp {
     display: inline-flex;
     align-items: center;
@@ -1022,12 +1059,18 @@
     padding: 8px 18px;
     font-size: 0.85rem;
     margin-top: 4px;
+    transition:
+        transform 160ms var(--footer-ease-out),
+        background-color 200ms ease,
+        border-color 200ms ease,
+        color 200ms ease;
 }
 
-.site-footer__whatsapp:hover {
-    border-color: var(--color-terracota);
+.site-footer__whatsapp:active {
+    transform: scale(0.97);
 }
 
+/* Instagram, WhatsApp y ubicación: tres círculos iguales en una fila. */
 .site-footer__social {
     display: flex;
     align-items: center;
@@ -1037,17 +1080,100 @@
 }
 
 .site-footer__social-icono {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: 1px solid rgba(250, 243, 232, 0.4);
+    transition:
+        transform 200ms var(--footer-ease-out),
+        background-color 200ms ease,
+        border-color 200ms ease,
+        color 200ms ease;
 }
 
-.site-footer__social-icono:hover {
-    border-color: var(--color-terracota);
+.site-footer__social-icono:active {
+    transform: scale(0.94);
+}
+
+/* Etiqueta flotante sobre cada círculo (en el de ubicación muestra la
+   dirección). Aparece desde abajo, anclada al ícono. */
+.site-footer__tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--color-blanco-calido);
+    color: var(--color-marron);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 4px) scale(0.97);
+    transform-origin: bottom center;
+    transition:
+        opacity 150ms ease-out,
+        transform 150ms var(--footer-ease-out);
+}
+
+.site-footer__social-icono:focus-visible {
+    outline: 2px solid var(--color-terracota);
+    outline-offset: 3px;
+}
+
+.site-footer__social-icono:focus-visible .site-footer__tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    /* ".site-footer" delante para ganarle a ".site-footer a:hover", que
+       pintaría el ícono del mismo terracota que el fondo. */
+    .site-footer .site-footer__whatsapp:hover,
+    .site-footer .site-footer__social-icono:hover {
+        background-color: var(--color-terracota);
+        border-color: var(--color-terracota);
+        color: var(--color-blanco-calido);
+    }
+
+    .site-footer__social-icono:hover {
+        transform: translateY(-2px);
+    }
+
+    .site-footer__social-icono:hover:active {
+        transform: translateY(-2px) scale(0.94);
+    }
+
+    .site-footer__social-icono:hover .site-footer__tooltip {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-footer__whatsapp,
+    .site-footer__social-icono,
+    .site-footer__tooltip {
+        transition-property: opacity, background-color, border-color, color;
+    }
+
+    .site-footer__whatsapp:active,
+    .site-footer__social-icono:active,
+    .site-footer__social-icono:hover,
+    .site-footer__social-icono:hover:active {
+        transform: none;
+    }
+
+    .site-footer__tooltip,
+    .site-footer__social-icono:hover .site-footer__tooltip,
+    .site-footer__social-icono:focus-visible .site-footer__tooltip {
+        transform: translate(-50%, 0);
+    }
 }
 
 .site-footer__creditos {
@@ -1584,9 +1710,7 @@
 /* ============================================================
    Estilos de .m-* (contenido de .home-mobile): a propósito FUERA
    de cualquier @media. Lo que se ve (tamaños, grilla, imágenes)
-   queda separado de CUÁNDO se ve (el @media de más abajo para
-   visitantes reales, o la clase ppe-vista-mobile del panel para
-   previsualizar/editar mobile desde un navegador de escritorio).
+   queda separado de CUÁNDO se ve (el @media de más abajo).
    Como las clases "m-*" solo existen dentro de .home-mobile, no
    hay riesgo de que esto se filtre a desktop.
    ============================================================ */
@@ -1838,12 +1962,8 @@
 
     .m-card__imagen {
         /* Capa libre sobre TODA la tarjeta (no una caja recortada a un
-           rincón): inset:0 la hace coincidir en tamaño con .m-card (el
-           editor visual usa el propio getBoundingClientRect() de este
-           elemento como referencia de arrastre — ver panel_preview_editor.js
-           — así que haciéndolo del tamaño de la tarjeta, esa referencia
-           YA ES .m-card sin tener que enseñarle al JS a mirar otro
-           elemento). El translate/scale de --imagen-x/-y/-size (ver abajo)
+           rincón): inset:0 la hace coincidir en tamaño con .m-card. El
+           translate/scale de --imagen-x/-y/-size (ver abajo)
            se aplica ACÁ, no en el <img>, exactamente como
            .categoria-card__imagen en desktop: mover/escalar el contenedor
            entero en vez del <img> es lo que permite que el % de
@@ -1852,9 +1972,7 @@
            elemento transformado) en vez de contra el tamaño chico de la
            foto. pointer-events:none replica el mismo patrón de desktop:
            en el sitio público esta capa no debe interceptar clicks (el
-           enlace "Ver más" vive en .m-card__cuerpo); el modo edición del
-           panel lo reactiva (ver panel_preview_editor.css,
-           .modo-edicion [data-editable-imagen]). */
+           enlace "Ver más" vive en .m-card__cuerpo). */
         position: absolute;
         inset: 0;
         pointer-events: none;
@@ -1988,36 +2106,4 @@
         width: 80px;
         height: 80px;
     }
-}
-
-/* ============================================================
-   Panel: selector Desktop/Mobile del editor visual (ver
-   panel_preview_editor.js). Fuerza cuál de las dos interfaces se
-   ve SIN depender del ancho real de la ventana del navegador del
-   admin — por eso .m-* está fuera del @media (arriba): así esta
-   clase alcanza para activar el look mobile completo aunque la
-   ventana sea de escritorio. No afecta a visitantes reales (esta
-   clase nunca se agrega fuera del modo edición del panel).
-   ============================================================ */
-body.ppe-vista-mobile .home-desktop {
-    display: none;
-}
-
-body.ppe-vista-mobile .home-mobile {
-    display: block;
-    /* El editor normalmente se abre en un navegador de escritorio: sin
-       este límite, .home-mobile (pensado para ~320-430px) se estiraría al
-       ancho completo de esa ventana — una foto de portada de 1500px de
-       alto, por ejemplo — en vez de parecerse a un teléfono real. */
-    max-width: 430px;
-    margin: 0 auto;
-    box-shadow: 0 0 0 1px var(--color-beige);
-}
-
-body.ppe-vista-desktop .home-mobile {
-    display: none;
-}
-
-body.ppe-vista-desktop .home-desktop {
-    display: block;
 }

@@ -48,7 +48,14 @@
     function actualizarContador(cantidad) {
         var contador = document.querySelector(".icono-accion__contador");
         if (contador && cantidad !== undefined) {
+            var cambio = String(contador.textContent).trim() !== String(cantidad);
             contador.textContent = cantidad;
+            if (cambio) {
+                // Reinicia la animación aunque se agregue dos veces seguidas.
+                contador.classList.remove("icono-accion__contador--salto");
+                void contador.offsetWidth;
+                contador.classList.add("icono-accion__contador--salto");
+            }
         }
     }
 

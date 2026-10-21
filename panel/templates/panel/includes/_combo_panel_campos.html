@@ -1,42 +1,61 @@
 {% comment %}
-Cuerpo del panel de Combo: campos del combo + formset de productos que lo
-integran (producto + cantidad). Se usa como "cuerpo_template" de
-_panel_formulario.html (espera "form" y "formset" en el contexto).
+Cuerpo del panel de Combo: campos del combo + formset de opciones a
+elección (ej. "Mini tarta" con sus sabores), que el cliente elige al
+agregar el combo al carrito. Se usa como "cuerpo_template" de
+_panel_formulario.html (espera "form" y "formset" en el contexto), y
+también lo reutiliza panel/combo_form.html.
 {% endcomment %}
-{% for field in form %}
-    {% if field.name != "imagen" and field.name != "imagen_pos_x" and field.name != "imagen_pos_y" and field.name != "imagen_zoom" %}
-        {% include "panel/includes/_campo.html" %}
-    {% endif %}
-{% endfor %}
+{% include "panel/includes/_campo.html" with field=form.nombre %}
+{% include "panel/includes/_campo.html" with field=form.descripcion %}
+{% include "panel/includes/_campo.html" with field=form.precio_promocional %}
 
 {% include "panel/includes/_editor_imagen_recorte.html" with campo_imagen=form.imagen campo_pos_x=form.imagen_pos_x campo_pos_y=form.imagen_pos_y campo_zoom=form.imagen_zoom imagen_actual=combo.imagen aspecto="4 / 3" etiqueta="Foto del combo" %}
 
 <div class="admin-panel-form__seccion">
-    <h3>Productos del combo</h3>
-    <p class="admin-field__ayuda">Elegí los productos que forman parte de este combo y la cantidad de cada uno.</p>
+    <h3>Opciones a elección</h3>
+    <p class="admin-field__ayuda">Para cada producto "a elección" del combo, poné un nombre, elegí la categoría y marcá los sabores que se pueden elegir. El cliente va a elegir uno de cada uno al agregar el combo al carrito.</p>
 
     {{ formset.management_form }}
     {% if formset.non_form_errors %}
         <div class="admin-alert admin-alert--error">{{ formset.non_form_errors }}</div>
     {% endif %}
 
-    <div class="admin-table-wrap">
-        <div class="admin-table-scroll">
-            <table class="admin-table">
-                <thead>
-                    <tr><th>Producto</th><th>Cantidad</th><th>Eliminar</th></tr>
-                </thead>
-                <tbody>
-                    {% for item_form in formset %}
-                    <tr>
-                        {{ item_form.id }}
-                        <td>{{ item_form.producto }}{% for error in item_form.producto.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}</td>
-                        <td>{{ item_form.cantidad }}</td>
-                        <td>{% if item_form.instance.pk %}{{ item_form.DELETE }}{% endif %}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="admin-elecciones">
+        {% for eleccion_form in formset %}
+        <div class="admin-eleccion" data-eleccion>
+            {{ eleccion_form.id }}
+            <div class="admin-eleccion__fila">
+                <div class="admin-field">
+                    <label for="{{ eleccion_form.nombre.id_for_label }}">Nombre</label>
+                    {{ eleccion_form.nombre }}
+                    {% for error in eleccion_form.nombre.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
+                </div>
+                <div class="admin-field">
+                    <label for="{{ eleccion_form.prefix }}-categoria">Categoría</label>
+                    <select id="{{ eleccion_form.prefix }}-categoria" data-eleccion-categoria>
+                        <option value="">Elegí una categoría</option>
+                        {% for categoria in eleccion_form.categorias %}
+                        <option value="{{ categoria.pk }}"{% if categoria.pk == eleccion_form.categoria_inicial %} selected{% endif %}>{{ categoria.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if eleccion_form.instance.pk %}
+                <label class="admin-eleccion__eliminar" title="Eliminar opción a elección">
+                    {{ eleccion_form.DELETE }}
+                    <span aria-hidden="true">🗑</span>
+                </label>
+                {% endif %}
+            </div>
+            <div class="admin-eleccion__opciones">
+                {% for opcion in eleccion_form.productos %}
+                <label class="admin-eleccion__opcion" data-categoria="{{ opcion.data.value.instance.categoria_id }}">
+                    {{ opcion.tag }} {{ opcion.choice_label }}
+                </label>
+                {% endfor %}
+                <span class="admin-field__ayuda" data-eleccion-vacio>Elegí una categoría para ver sus sabores.</span>
+            </div>
+            {% for error in eleccion_form.productos.errors %}<span class="admin-field__error">{{ error }}</span>{% endfor %}
         </div>
+        {% endfor %}
     </div>
 </div>

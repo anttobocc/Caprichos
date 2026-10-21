@@ -29,7 +29,7 @@ carrito_hay_no_disponibles, carrito_checkout_form.
         </div>
         <div class="carrito-drawer__item-info">
             <p class="carrito-drawer__item-nombre">{{ linea.nombre }}</p>
-            {% if linea.variante %}<p class="carrito-drawer__item-variante">{{ linea.variante.nombre }}</p>{% endif %}
+            {% if linea.detalle %}<p class="carrito-drawer__item-variante">{{ linea.detalle }}</p>{% endif %}
             <p class="carrito-drawer__item-detalle">${{ linea.precio_unitario }} c/u</p>
             {% if not linea.disponible %}<p class="producto-card__no-disponible">No disponible</p>{% endif %}
 

@@ -80,7 +80,9 @@ class ItemPedido(models.Model):
     # del combo (se reutiliza el mismo campo snapshot en vez de agregar uno
     # "nombre_combo" redundante).
     nombre_producto = models.CharField(max_length=200)
-    nombre_variante = models.CharField(max_length=100, blank=True)
+    # Para una línea de combo guarda las opciones elegidas por el cliente
+    # (ej. "Mini tarta: Frutilla · Mini budín: Limón").
+    nombre_variante = models.CharField(max_length=255, blank=True)
     cantidad = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
