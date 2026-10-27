@@ -12,12 +12,14 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from dotenv import load_dotenv
 
-load_dotenv('/home/capricho/Caprichos/.env', override=True)
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# En PythonAnywhere se usa el .env del servidor; en local, el .env del proyecto.
+_PROD_ENV = Path('/home/capricho/Caprichos/.env')
+load_dotenv(_PROD_ENV if _PROD_ENV.exists() else BASE_DIR / '.env', override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
@@ -40,9 +42,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://capricho.pythonanywhere.com",
 ]
 
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Application definition
 

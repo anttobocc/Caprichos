@@ -655,7 +655,7 @@
 }
 
 .productos-grid--destacados .producto-card__precio {
-    font-size: 1.55rem;
+    font-size: 1.8rem;
     margin-top: 6px;
 }
 
@@ -767,9 +767,15 @@
 .producto-card__precio {
     font-family: var(--fuente-titulos);
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     color: var(--color-terracota);
     margin: 4px 0 0;
+}
+
+/* En la página de un producto o combo el precio va más grande. */
+.producto-detalle__info .producto-card__precio {
+    font-size: 2.2rem;
+    margin: 8px 0 4px;
 }
 
 .producto-card__unidad {
@@ -876,9 +882,60 @@
 .variantes-lista {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Opciones de producto como pastillas: el radio queda oculto pero accesible. */
+.opcion {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.opcion input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    pointer-events: none;
+}
+
+.opcion__pastilla {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border: 1px solid var(--color-marron);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-marron);
+    font-weight: 500;
+    line-height: 1.2;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+
+.opcion:hover .opcion__pastilla {
+    border-color: var(--color-oliva-oscuro);
+    background: var(--color-blanco-calido);
+}
+
+.opcion:active .opcion__pastilla {
+    transform: scale(0.97);
+}
+
+.opcion input:checked + .opcion__pastilla {
+    background: var(--color-oliva-oscuro);
+    border-color: var(--color-oliva-oscuro);
+    color: var(--color-blanco-calido);
+    font-weight: 600;
+}
+
+.opcion input:focus-visible + .opcion__pastilla {
+    outline: 3px solid var(--color-terracota);
+    outline-offset: 2px;
 }
 
 .producto-detalle__eje-titulo {

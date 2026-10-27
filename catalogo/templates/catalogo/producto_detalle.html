@@ -35,9 +35,9 @@
                     <ul class="variantes-lista" data-eje="cantidad">
                         {% for cantidad in cantidades %}
                         <li>
-                            <label>
+                            <label class="opcion">
                                 <input type="radio" name="cantidad_elegida" value="{{ cantidad }}" {% if forloop.first %}checked{% endif %} data-opcion-cantidad>
-                                {{ cantidad }}
+                                <span class="opcion__pastilla">{{ cantidad }}</span>
                             </label>
                         </li>
                         {% endfor %}
@@ -49,9 +49,9 @@
                     <ul class="variantes-lista" data-eje="modalidad">
                         {% for valor, etiqueta in modalidades %}
                         <li>
-                            <label>
+                            <label class="opcion">
                                 <input type="radio" name="modalidad_elegida" value="{{ valor }}" {% if forloop.first %}checked{% endif %} data-opcion-modalidad>
-                                {{ etiqueta }}
+                                <span class="opcion__pastilla">{{ etiqueta }}</span>
                             </label>
                         </li>
                         {% endfor %}
@@ -71,20 +71,21 @@
             </form>
         {% elif variantes %}
             <h2>Opciones</h2>
-            <form method="post" action="{% url 'pedidos:carrito_agregar' producto.pk %}" class="producto-detalle__form">
+            <form method="post" action="{% url 'pedidos:carrito_agregar' producto.pk %}" class="producto-detalle__form" data-selector-simple>
                 {% csrf_token %}
                 <ul class="variantes-lista">
                     {% for variante in variantes %}
                     <li>
-                        <label>
-                            <input type="radio" name="variante_id" value="{{ variante.pk }}" {% if forloop.first %}checked{% endif %} required>
-                            {{ variante.nombre }} — ${{ variante.precio }}
+                        <label class="opcion">
+                            <input type="radio" name="variante_id" value="{{ variante.pk }}" data-precio="{{ variante.precio }}" {% if forloop.first %}checked{% endif %} required>
+                            <span class="opcion__pastilla">{{ variante.nombre }}</span>
                         </label>
                     </li>
                     {% endfor %}
                 </ul>
+                <p class="producto-card__precio" data-precio-mostrado>{% if variantes %}${{ variantes.0.precio }}{% endif %}</p>
                 <div class="producto-detalle__cantidad">
-                    <span>Cantidad:</span>
+                    <span>Cantidad a pedir:</span>
                     <div class="stepper-cantidad">
                         <button type="button" class="stepper-cantidad__boton" data-stepper-menos aria-label="Restar una unidad">−</button>
                         <input type="number" name="cantidad" value="1" min="1" class="stepper-cantidad__valor" data-stepper-valor readonly>
@@ -112,6 +113,25 @@
 </section>
 
 <p class="contenedor pagina-listado__volver"><a href="{% url 'catalogo:productos' %}">← Volver a productos</a></p>
+
+{% if variantes and not cantidades %}
+<script>
+(function () {
+    "use strict";
+    var form = document.querySelector("[data-selector-simple]");
+    if (!form) { return; }
+    var precioEl = form.querySelector("[data-precio-mostrado]");
+
+    function actualizar() {
+        var elegida = form.querySelector('input[name="variante_id"]:checked');
+        precioEl.textContent = elegida ? "$" + elegida.getAttribute("data-precio") : "$—";
+    }
+
+    form.addEventListener("change", actualizar);
+    actualizar();
+})();
+</script>
+{% endif %}
 
 {% if cantidades %}
 <script>
