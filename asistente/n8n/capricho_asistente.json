@@ -1,0 +1,164 @@
+{
+  "name": "Capricho – Asistente web (Django + Groq)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "capricho-asistente",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://capricho.pythonanywhere.com,http://127.0.0.1:8000,http://localhost:8000"
+        }
+      },
+      "id": "18b35f82-23a1-4073-984d-583838672970",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "c504f9a6-6dd3-49cf-87f1-2d55eef34c57"
+    },
+    {
+      "parameters": {
+        "url": "https://capricho.pythonanywhere.com/asistente/catalogo.json",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "6e70fd52-d30d-4524-84ef-0d54afa7c5ea",
+      "name": "Catálogo Capricho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.pregunta }}",
+        "options": {
+          "systemMessage": "=Sos el asistente virtual de Capricho, una boutique de empanadas y pastelería artesanal de Corrientes Capital (Argentina). Atendés a los clientes que escriben desde el sitio web.\n\nCÓMO RESPONDER\n- Español rioplatense con voseo, cálido y amable. Respuestas breves (2 a 5 oraciones o una lista corta).\n- Texto plano. Podés usar **negrita** para resaltar y pegar links completos (https://...). No uses tablas ni títulos con #.\n- Precios siempre en pesos argentinos con punto de miles: $17.500.\n- Tené en cuenta lo que el cliente dijo antes en esta conversación; si cambia de tema y después vuelve, retomá sin pedirle que repita.\n\nQUÉ PODÉS DECIR\n- Usá ÚNICAMENTE la información del bloque DATOS de abajo. Nunca inventes productos, sabores, precios, promociones, horarios ni plazos.\n- Si un producto tiene \"disponible\": false, aclarale que por ahora no está disponible.\n- Si te preguntan algo que no está en DATOS (horarios, medios de pago, ingredientes, alérgenos, costo exacto del envío, etc.), decí que no tenés ese dato y sugerí consultarlo por WhatsApp pegando el link de \"whatsapp_link\".\n- Pedidos: se hacen con al menos \"dias_minimos_anticipacion\" día(s) y hasta \"dias_maximos_anticipacion\" días de anticipación.\n- Vos NO tomás pedidos ni pagos. Explicá cómo pedir: entrar al producto en el sitio (podés pasar su \"url\"), agregarlo al carrito, elegir retiro o envío y la fecha, y confirmar; el detalle se envía por WhatsApp al negocio.\n- Si la consulta no tiene nada que ver con Capricho, respondé con amabilidad que solo podés ayudar con temas de Capricho.\n\nDATOS (se actualizan solos desde el panel del sitio):\n{{ JSON.stringify($('Catálogo Capricho').item.json) }}"
+        }
+      },
+      "id": "0d8ebe34-666a-4ab4-9f5d-c2b72ec4c4ed",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "8dea7e51-8333-47e2-9466-ca2baf8afa7a",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.sessionId }}",
+        "contextWindowLength": 5
+      },
+      "id": "3d6c2279-5795-4b7e-8080-2b4113c4ca0f",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        580,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"respuesta\": $json.output } }}",
+        "options": {}
+      },
+      "id": "0e6f6323-3700-4ef9-be38-f0497ec6c594",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Catálogo Capricho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catálogo Capricho": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

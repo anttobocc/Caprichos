@@ -2,7 +2,7 @@
 <article class="producto-card">
     <a href="{% url 'catalogo:combo_detalle' combo.slug %}" class="producto-card__imagen-link">
         {% if combo.imagen %}
-            <img src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};">
+            <img loading="lazy" decoding="async" src="{{ combo.imagen.url }}" alt="{{ combo.nombre }}" style="--img-x:{{ combo.imagen_pos_x }};--img-y:{{ combo.imagen_pos_y }};--img-zoom:{{ combo.imagen_zoom }};">
         {% else %}
             <div class="producto-card__sin-imagen" aria-hidden="true">🎁</div>
         {% endif %}

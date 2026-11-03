@@ -1,6 +1,9 @@
 {% extends "catalogo/base_catalogo.html" %}
 
-{% block title %}{{ combo.nombre }} | Capricho{% endblock %}
+{% load seo_tags %}
+{% block title %}{{ combo.nombre }} | Combos Capricho Corrientes{% endblock %}
+{% block seo %}{% meta_combo combo as desc_combo %}{% with titulo_combo=combo.nombre|add:" | Combos Capricho Corrientes" %}{% include "seo/_meta.html" with seo_titulo=titulo_combo seo_descripcion=desc_combo seo_imagen=combo.imagen|url_segura seo_tipo="product" %}{% endwith %}{% endblock %}
+{% block structured_data %}{% jsonld_combo combo %}{% endblock %}
 
 {% block catalogo_content %}
 <section class="contenedor producto-detalle">

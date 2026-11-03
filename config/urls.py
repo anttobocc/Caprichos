@@ -16,12 +16,21 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
+
+from seo.sitemaps import SITEMAPS
+from seo.views import robots_txt
 
 # El Django Admin predeterminado (django.contrib.admin) no se expone como
 # interfaz administrativa: toda la gestión del sitio vive en /panel/, la
 # app propia de Capricho. Ver panel/urls.py.
 urlpatterns = [
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', cache_page(60 * 60)(sitemap), {'sitemaps': SITEMAPS},
+         name='django.contrib.sitemaps.views.sitemap'),
+    path('asistente/', include('asistente.urls')),
     path('panel/', include('panel.urls')),
     path('', include('usuarios.urls')),
     path('', include('pedidos.urls')),

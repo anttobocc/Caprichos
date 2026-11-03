@@ -1,6 +1,9 @@
 {% extends "catalogo/base_catalogo.html" %}
 
-{% block title %}Capricho | Boutique Empanadas & Bakery{% endblock %}
+{% load seo_tags %}
+{% block title %}Capricho | Empanadas y pastelería artesanal en Corrientes{% endblock %}
+{% block seo %}{% include "seo/_meta.html" with seo_titulo="Capricho | Empanadas y pastelería artesanal en Corrientes" %}{% endblock %}
+{% block structured_data %}{% jsonld_negocio %}{% endblock %}
 
 {% block catalogo_content %}
 {% comment %}
@@ -16,7 +19,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
 <section class="hero">
     <div class="hero__imagen" aria-hidden="true">
         <div class="hero__imagen-marco">
-            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}" alt="" style="--img-x:{{ configuracion_negocio.portada_imagen_pos_x }};--img-y:{{ configuracion_negocio.portada_imagen_pos_y }};--img-zoom:{{ configuracion_negocio.portada_imagen_zoom }};">
+            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}"" alt="Empanadas y pastelería artesanal de Capricho" style="--img-x:{{ configuracion_negocio.portada_imagen_pos_x }};--img-y:{{ configuracion_negocio.portada_imagen_pos_y }};--img-zoom:{{ configuracion_negocio.portada_imagen_zoom }};">
         </div>
     </div>
 
@@ -58,11 +61,11 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                 </div>
             </div>
             {% if categoria.slug == "empanadas" %}
-                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho" loading="lazy" decoding="async"></div>
             {% elif categoria.slug == "budines" %}
-                <div class="categoria-card__imagen categoria-card__imagen--budines" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--budines" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho" loading="lazy" decoding="async"></div>
             {% elif categoria.slug == "dulces" %}
-                <div class="categoria-card__imagen categoria-card__imagen--tartas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--tartas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho" loading="lazy" decoding="async"></div>
             {% elif categoria.imagen_categoria %}
                 {% comment %}
                 Categorías sin arte dedicado (ej. Alfajores) usan la imagen de
@@ -70,7 +73,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                 la tarjeta se muestra sin imagen decorativa (el layout ya
                 contempla ese caso, ver .categoria-card__imagen en el CSS).
                 {% endcomment %}
-                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho"></div>
+                <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho" loading="lazy" decoding="async"></div>
             {% endif %}
         </article>
         {% endfor %}
@@ -95,7 +98,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
                     <a href="{{ whatsapp_link_general }}" target="_blank" rel="noopener" class="categoria-card__enlace">Pedí ahora ♥</a>
                 </div>
             </div>
-            <div class="categoria-card__imagen categoria-card__imagen--pedidos" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_tamano }};"><img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho"></div>
+            <div class="categoria-card__imagen categoria-card__imagen--pedidos" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_tamano }};"><img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho" loading="lazy" decoding="async"></div>
         </article>
     </div>
 </section>
@@ -114,7 +117,7 @@ independiente de la desktop.
 <div class="home-mobile">
     <section class="m-hero">
         <div class="m-hero__imagen">
-            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}" alt="">
+            <img src="{% if configuracion_negocio.portada_imagen %}{{ configuracion_negocio.portada_imagen.url }}{% else %}/media/productos/portada.png{% endif %}"" alt="Empanadas y pastelería artesanal de Capricho">
             <div class="m-sello">
                 <span>Se toman pedidos con</span>
                 <strong>{{ configuracion_negocio.dias_anticipacion_pedido }} día{{ configuracion_negocio.dias_anticipacion_pedido|pluralize }}</strong>
@@ -129,7 +132,8 @@ independiente de la desktop.
                 <img src="/static/img/flores-portada.png" alt="">
             </div>
             <p class="m-hero__decorativa">Hechos con amor,</p>
-            <h1>Pensados<br>para vos</h1>
+            {# Un solo <h1> por página (SEO): el de la versión desktop. Este es visual. #}
+            <p class="m-hero__titulo">Pensados<br>para vos</p>
             <p class="m-hero__descripcion">Productos artesanales elaborados cada día con ingredientes seleccionados.</p>
             <a href="{% url 'catalogo:productos' %}" class="boton m-hero__boton">Ver nuestros productos ♥</a>
         </div>
@@ -149,13 +153,13 @@ independiente de la desktop.
                 </div>
                 <div class="m-card__imagen" style="--imagen-x:{{ categoria.imagen_mobile_pos_x }};--imagen-y:{{ categoria.imagen_mobile_pos_y }};--imagen-size:{{ categoria.imagen_mobile_tamano }};">
                     {% if categoria.slug == "empanadas" %}
-                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho">
+                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-empanadas.png{% endif %}" alt="Empanadas Capricho" loading="lazy" decoding="async">
                     {% elif categoria.slug == "budines" %}
-                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho">
+                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-budines.png{% endif %}" alt="Budines Capricho" loading="lazy" decoding="async">
                     {% elif categoria.slug == "dulces" %}
-                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho">
+                        <img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho" loading="lazy" decoding="async">
                     {% elif categoria.imagen_categoria %}
-                        <img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho">
+                        <img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho" loading="lazy" decoding="async">
                     {% endif %}
                 </div>
             </article>
@@ -168,7 +172,7 @@ independiente de la desktop.
                     <a href="{{ whatsapp_link_general }}" target="_blank" rel="noopener" class="m-card__enlace">Pedí ahora ♥</a>
                 </div>
                 <div class="m-card__imagen" style="--imagen-x:{{ configuracion_negocio.pedidos_imagen_mobile_pos_x }};--imagen-y:{{ configuracion_negocio.pedidos_imagen_mobile_pos_y }};--imagen-size:{{ configuracion_negocio.pedidos_imagen_mobile_tamano }};">
-                    <img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho">
+                    <img src="{% if configuracion_negocio.pedidos_imagen %}{{ configuracion_negocio.pedidos_imagen.url }}{% else %}/media/productos/categoria-pedidos.png{% endif %}" alt="Pedidos Capricho" loading="lazy" decoding="async">
                 </div>
             </article>
         </div>

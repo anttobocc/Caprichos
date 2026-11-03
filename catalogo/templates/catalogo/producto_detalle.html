@@ -1,7 +1,9 @@
 {% extends "catalogo/base_catalogo.html" %}
-{% load catalogo_extras %}
+{% load catalogo_extras seo_tags %}
 
-{% block title %}{{ producto.nombre }} | Capricho{% endblock %}
+{% block title %}{{ producto.nombre }} | Capricho Corrientes{% endblock %}
+{% block seo %}{% meta_producto producto as desc_prod %}{% with titulo_prod=producto.nombre|add:" | Capricho Corrientes" %}{% include "seo/_meta.html" with seo_titulo=titulo_prod seo_descripcion=desc_prod seo_imagen=producto.imagen|url_segura seo_tipo="product" %}{% endwith %}{% endblock %}
+{% block structured_data %}{% jsonld_producto producto %}{% endblock %}
 
 {% block catalogo_content %}
 <section class="contenedor producto-detalle">

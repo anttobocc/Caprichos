@@ -46,6 +46,11 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
+# HSTS (Unidad 9 · SEO técnico / seguridad): le indica al navegador que el
+# sitio siempre se usa por HTTPS. Solo en producción.
+SECURE_HSTS_SECONDS = 0 if DEBUG else 60 * 60 * 24 * 365
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -55,10 +60,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'catalogo',
     'pedidos',
     'panel',
     'usuarios',
+    'seo',
+    'asistente',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +95,7 @@ TEMPLATES = [
                 'pedidos.context_processors.carrito_resumen',
                 'panel.context_processors.configuracion_negocio',
                 'catalogo.context_processors.navbar_combos',
+                'seo.context_processors.seo',
             ],
         },
     },
@@ -159,3 +168,9 @@ LOGOUT_REDIRECT_URL = 'panel:login'
 # Reglas propias del negocio (Capricho)
 MIN_ORDER_ADVANCE_DAYS = 1
 MAX_ORDER_ADVANCE_DAYS = 10
+
+
+# Asistente virtual (n8n). URL de producción del Webhook del workflow
+# "Capricho – Asistente" (ver asistente/n8n/). Si está vacía, el chat no
+# se muestra en el sitio.
+N8N_CHAT_WEBHOOK_URL = os.getenv('N8N_CHAT_WEBHOOK_URL', '')
