@@ -1893,7 +1893,7 @@
     }
 
     .m-hero__decorativa,
-    .m-hero__texto h1,
+    .m-hero__titulo,
     .m-hero__descripcion,
     .m-hero__boton {
         position: relative;
@@ -1910,7 +1910,9 @@
         color: var(--color-marron);
     }
 
-    .m-hero__texto h1 {
+    .m-hero__titulo {
+        font-family: var(--fuente-titulos);
+        font-weight: 700;
         margin: 0 0 14px;
         font-size: 2rem;
         line-height: 1.15;

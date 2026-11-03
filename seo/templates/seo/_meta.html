@@ -1,0 +1,20 @@
+{% load static %}{% comment %}
+Etiquetas SEO de cada página (Unidad 9 · SEO On-Page).
+Variables opcionales: seo_titulo, seo_descripcion, seo_imagen (URL
+relativa o absoluta), seo_tipo ("website" / "product").
+Las páginas del panel, carrito/pedidos y usuarios se marcan noindex
+(seo/context_processors.py) y no llevan canónica.
+{% endcomment %}{% with titulo=seo_titulo|default:"Capricho | Boutique Empanadas & Bakery en Corrientes" descripcion=seo_descripcion|default:"Capricho, boutique de empanadas y pastelería artesanal en Corrientes. Empanadas, tartas, budines y combos por encargo, con retiro o envío a domicilio. Hacé tu pedido online." %}
+    <meta name="description" content="{{ descripcion }}">
+    {% if seo_noindex %}<meta name="robots" content="noindex, nofollow">
+    {% else %}<meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ seo_canonical_url }}">{% endif %}
+    <meta property="og:site_name" content="Capricho">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:type" content="{{ seo_tipo|default:'website' }}">
+    <meta property="og:title" content="{{ titulo }}">
+    <meta property="og:description" content="{{ descripcion }}">
+    <meta property="og:url" content="{{ seo_canonical_url }}">
+    <meta property="og:image" content="{% if seo_imagen %}{% if '://' in seo_imagen %}{{ seo_imagen }}{% else %}{{ seo_base_url }}{{ seo_imagen }}{% endif %}{% else %}{{ seo_base_url }}{% static 'img/logo.png' %}{% endif %}">
+    <meta name="twitter:card" content="summary_large_image">
+{% endwith %}

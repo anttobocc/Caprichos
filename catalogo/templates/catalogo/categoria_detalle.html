@@ -1,6 +1,8 @@
 {% extends "catalogo/base_catalogo.html" %}
 
-{% block title %}{{ categoria.nombre }} | Capricho{% endblock %}
+{% load seo_tags %}
+{% block title %}{{ categoria.nombre }} artesanales en Corrientes | Capricho{% endblock %}
+{% block seo %}{% meta_categoria categoria as desc_cat %}{% with titulo_cat=categoria.nombre|add:" artesanales en Corrientes | Capricho" %}{% include "seo/_meta.html" with seo_titulo=titulo_cat seo_descripcion=desc_cat seo_imagen=categoria.imagen_categoria|url_segura %}{% endwith %}{% endblock %}
 
 {% block catalogo_content %}
 <section class="pagina-listado contenedor">

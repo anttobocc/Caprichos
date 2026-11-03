@@ -1,6 +1,7 @@
 {% extends "catalogo/base_catalogo.html" %}
 
-{% block title %}Productos | Capricho{% endblock %}
+{% block title %}{% if categoria_actual %}{{ categoria_actual.nombre }} – {% endif %}Productos | Capricho Corrientes{% endblock %}
+{% block seo %}{% include "seo/_meta.html" with seo_titulo="Productos | Capricho Corrientes" seo_descripcion="Catálogo de Capricho: empanadas, tartas, budines, pastafrolas y combos artesanales. Elegí tus productos y pedilos con retiro o envío en Corrientes." %}{% endblock %}
 
 {% block catalogo_content %}
 <section class="pagina-listado contenedor">

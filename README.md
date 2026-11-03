@@ -219,6 +219,8 @@ Caprichos.Store.Ctes/
 ├── pedidos/        → Carrito y gestión de pedidos
 ├── panel/          → Administración del negocio
 ├── usuarios/       → Gestión de usuarios
+├── seo/            → Sitemap, robots.txt, metadatos y datos estructurados
+├── asistente/      → Chat con IA vía n8n (+ workflow exportado en asistente/n8n/)
 ├── config/         → Configuración general del proyecto
 │
 ├── templates/      → Interfaces HTML
@@ -227,3 +229,25 @@ Caprichos.Store.Ctes/
 │
 ├── manage.py
 └── README.md
+```
+
+---
+
+## 🔎 SEO
+
+Aplicado según la Unidad 9 (SEO y Servidores):
+
+- **On-Page**: título y meta description propios en cada página (productos con nombre, precio y ciudad), un solo `<h1>` por página, `alt` descriptivo y `loading="lazy"` en imágenes, URLs amigables con slug.
+- **Técnico**: `/sitemap.xml` automático (inicio, productos, categorías y combos activos), `/robots.txt` que bloquea panel, carrito, checkout y cuentas, URL canónica, HTTPS + HSTS en producción, `noindex` en páginas privadas.
+- **Local**: datos estructurados `Bakery` (schema.org) con nombre, dirección, WhatsApp y zona de envío; `Product` con precio en ARS en cada producto y combo. Open Graph para compartir en WhatsApp/Instagram.
+
+Después de publicar: dar de alta el sitio en **Google Search Console**, enviar `https://capricho.pythonanywhere.com/sitemap.xml` y mantener el mismo nombre, dirección y teléfono (NAP) en el **Google Business Profile** y en Instagram.
+
+---
+
+## 🤖 Asistente con IA (n8n)
+
+Chat flotante en el sitio público conectado a un workflow de n8n con un agente de IA (Groq) y memoria por conversación. Lee el catálogo en vivo desde `/asistente/catalogo.json`, así que responde con los precios cargados en el panel. Se activa con la variable `N8N_CHAT_WEBHOOK_URL` del `.env`.
+
+Guía de configuración: [`asistente/n8n/README.md`](asistente/n8n/README.md).
+
