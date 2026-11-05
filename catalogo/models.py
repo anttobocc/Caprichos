@@ -44,16 +44,8 @@ class Categoria(models.Model):
         validators=[MinValueValidator(50), MaxValueValidator(5000)],
         help_text="Alto de la imagen en px (el ancho se ajusta proporcionalmente).",
     )
-    # Ajuste independiente del de arriba: la tarjeta de categoría en mobile
-    # (.m-card, ver catalogo/home.html y catalogo.css) es un diseño propio,
-    # no una versión reducida de la tarjeta desktop, así que necesita su
-    # propia posición/escala de imagen en vez de heredar imagen_pos_x/y/
-    # imagen_tamano. A diferencia de los campos de arriba (0-100, recorte
-    # dentro de una caja fija), acá la imagen es una capa libre sobre TODA
-    # la tarjeta (.m-card, no .m-card__imagen): X/Y pueden salir de 0-100
-    # (con SmallIntegerField, no Positive) para poder arrastrarla bien
-    # afuera de la tarjeta hacia cualquier lado, y el tamaño no tiene techo
-    # atado al recuadro.
+    # Posición y tamaño de la imagen en la tarjeta mobile. X/Y admiten
+    # valores fuera de 0-100 para poder desplazarla fuera de la tarjeta.
     imagen_mobile_pos_x = models.SmallIntegerField(
         verbose_name="posición horizontal mobile (X)",
         default=50,
@@ -117,9 +109,8 @@ class Producto(models.Model):
         validators=[MinValueValidator(100), MaxValueValidator(200)],
         help_text="Escala de la imagen dentro de su recuadro, en % (100 = ajuste normal).",
     )
-    # Solo se usa cuando el producto NO tiene variantes; si tiene variantes,
-    # el precio real lo determina cada VarianteProducto. Esta regla se
-    # valida en los formularios/servicios del panel y del checkout, no acá.
+    # Solo aplica a productos sin variantes; con variantes, el precio
+    # sale de cada VarianteProducto.
     precio = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     unidad_venta = models.CharField(max_length=10, choices=UnidadVenta.choices)
     disponible = models.BooleanField(default=True)
@@ -138,8 +129,7 @@ class Producto(models.Model):
 
     @property
     def tiene_variantes(self):
-        # Una variante desactivada no cuenta: un producto solo "usa variantes"
-        # si tiene al menos una activa (ver validación en panel.forms).
+        # Solo cuentan las variantes activas.
         return self.variantes.filter(activo=True).exists()
 
     @property
@@ -148,7 +138,7 @@ class Producto(models.Model):
 
     @property
     def tiene_modalidad(self):
-        # True para productos con eje "cantidad x modalidad" (hoy: Empanadas).
+        # Productos con dos ejes de compra: cantidad y modalidad (ej. Empanadas).
         return self.variantes.filter(activo=True).exclude(modalidad="").exists()
 
 
@@ -162,12 +152,8 @@ class VarianteProducto(models.Model):
         on_delete=models.CASCADE,
         related_name="variantes",
     )
-    # Representa la cantidad/presentación (Unidad, Media docena, Docena,
-    # Pequeña/Mediana/Grande, etc.). Para productos con dos ejes de compra
-    # (hoy: Empanadas) se combina con "modalidad" para formar cada
-    # combinación cantidad+modalidad como una fila propia, sin que eso
-    # implique variantes visibles como productos independientes: la interfaz
-    # pública sigue mostrando dos selectores (cantidad y modalidad).
+    # Cantidad o presentación (Unidad, Docena, Grande...). En productos con
+    # dos ejes de compra se combina con "modalidad".
     nombre = models.CharField(max_length=100)
     modalidad = models.CharField(
         max_length=10,
@@ -264,9 +250,8 @@ class ComboItem(models.Model):
 
 
 class ComboEleccion(models.Model):
-    """Un producto "a elección" dentro de un combo (ej. "Mini tarta"), con
-    los productos del catálogo entre los que elige el cliente al agregarlo
-    al carrito (ej. los sabores de Tartas)."""
+    """Producto a elección dentro de un combo (ej. "Mini tarta") y las
+    opciones entre las que elige el cliente."""
 
     combo = models.ForeignKey(Combo, on_delete=models.CASCADE, related_name="elecciones")
     nombre = models.CharField(max_length=100)
@@ -282,8 +267,7 @@ class ComboEleccion(models.Model):
 
     @property
     def lista_opciones(self):
-        """Nombres de las opciones que el cliente puede elegir hoy: solo
-        productos activos y disponibles, sin repetir la categoría
+        """Opciones activas y disponibles, sin el nombre de la categoría
         ("Tarta de coco" -> "Coco")."""
         from .templatetags.catalogo_extras import quitar_prefijo_categoria
 

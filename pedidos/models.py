@@ -74,11 +74,8 @@ class ItemPedido(models.Model):
         blank=True,
         related_name="items_pedido",
     )
-    # Snapshots: conservan el detalle del pedido aunque el producto/variante/combo
-    # se elimine, cambie o se desactive después. Para una línea de combo,
-    # "producto"/"variante" quedan en null y "nombre_producto" guarda el nombre
-    # del combo (se reutiliza el mismo campo snapshot en vez de agregar uno
-    # "nombre_combo" redundante).
+    # Copia de los datos al momento del pedido. En combos, producto y variante
+    # quedan en null y nombre_producto guarda el nombre del combo.
     nombre_producto = models.CharField(max_length=200)
     # Para una línea de combo guarda las opciones elegidas por el cliente
     # (ej. "Mini tarta: Frutilla · Mini budín: Limón").

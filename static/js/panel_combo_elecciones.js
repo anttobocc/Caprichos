@@ -1,9 +1,4 @@
-/* Opciones a elección del combo (panel): el selector "Categoría" de cada
- * fila filtra qué sabores (productos activos) se muestran como casillas.
- * Al cambiar de categoría se desmarcan los sabores de la anterior y se
- * marcan todos los de la nueva, para que el administrador solo tenga que
- * destildar los que no entran en el combo. La categoría no se guarda: al
- * reabrir el formulario se deduce de los sabores ya marcados. */
+/* Filtra los sabores de cada opción a elección según la categoría. */
 (function () {
     "use strict";
 

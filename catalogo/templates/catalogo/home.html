@@ -6,15 +6,7 @@
 {% block structured_data %}{% jsonld_negocio %}{% endblock %}
 
 {% block catalogo_content %}
-{% comment %}
-PORTADA — dos interfaces separadas, no una sola achicada:
-.home-desktop es el diseño de escritorio de siempre (intacto);
-.home-mobile es un diseño nuevo, propio de mobile, con sus
-propias clases "m-*" (sin relación de cascada con las de
-desktop). El CSS decide cuál mostrar por ancho de pantalla
-(ver catalogo.css, bloque responsive dentro de
-@media (max-width: 767px)) — nunca los dos a la vez.
-{% endcomment %}
+{# Portada: versiones desktop y mobile separadas. #}
 <div class="home-desktop">
 <section class="hero">
     <div class="hero__imagen" aria-hidden="true">
@@ -67,23 +59,10 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
             {% elif categoria.slug == "dulces" %}
                 <div class="categoria-card__imagen categoria-card__imagen--tartas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{% if categoria.imagen_categoria %}{{ categoria.imagen_categoria.url }}{% else %}/media/productos/categoria-tartas.png{% endif %}" alt="Tartas Capricho" loading="lazy" decoding="async"></div>
             {% elif categoria.imagen_categoria %}
-                {% comment %}
-                Categorías sin arte dedicado (ej. Alfajores) usan la imagen de
-                portada subida desde el panel si existe; si no hay ninguna,
-                la tarjeta se muestra sin imagen decorativa (el layout ya
-                contempla ese caso, ver .categoria-card__imagen en el CSS).
-                {% endcomment %}
                 <div class="categoria-card__imagen categoria-card__imagen--empanadas" style="--imagen-x:{{ categoria.imagen_pos_x }};--imagen-y:{{ categoria.imagen_pos_y }};--imagen-size:{{ categoria.imagen_tamano }};"><img src="{{ categoria.imagen_categoria.url }}" alt="{{ categoria.nombre }} Capricho" loading="lazy" decoding="async"></div>
             {% endif %}
         </article>
         {% endfor %}
-        {% comment %}
-        Posicionado respecto de .categorias-grid (su padre position:relative,
-        ver CSS), no del viewport: left:75% cae exactamente en el borde
-        entre la 3ra y 4ta columna de esta grilla de 4 columnas iguales
-        (el límite real entre "Empanadas" y "Pedidos"), a cualquier ancho
-        de pantalla, sin ningún cálculo manual en px/vw.
-        {% endcomment %}
         <div class="sello-pedidos">
             <span>Se toman pedidos con</span>
             <strong>{{ configuracion_negocio.dias_anticipacion_pedido }} día{{ configuracion_negocio.dias_anticipacion_pedido|pluralize }}</strong>
@@ -103,17 +82,7 @@ desktop). El CSS decide cuál mostrar por ancho de pantalla
     </div>
 </section>
 </div>
-{% comment %}
-/.home-desktop — de acá para abajo, la portada+categorías de
-MOBILE. Reutiliza los mismos datos (config, categorías, link
-de WhatsApp) y los mismos assets de imagen que desktop — no
-hay imágenes nuevas ni lógica de negocio duplicada — pero con
-markup y clases propias ("m-*") pensadas para esta pantalla,
-no una copia reducida del markup de desktop. Las imágenes de
-categorías tienen su propia posición/escala mobile en el modelo
-(prefijo "imagen_mobile" / "pedidos_imagen_mobile"),
-independiente de la desktop.
-{% endcomment %}
+{# Versión mobile #}
 <div class="home-mobile">
     <section class="m-hero">
         <div class="m-hero__imagen">
@@ -132,7 +101,7 @@ independiente de la desktop.
                 <img src="/static/img/flores-portada.png" alt="">
             </div>
             <p class="m-hero__decorativa">Hechos con amor,</p>
-            {# Un solo <h1> por página (SEO): el de la versión desktop. Este es visual. #}
+            {# Título visual; el <h1> de la página está en la versión desktop. #}
             <p class="m-hero__titulo">Pensados<br>para vos</p>
             <p class="m-hero__descripcion">Productos artesanales elaborados cada día con ingredientes seleccionados.</p>
             <a href="{% url 'catalogo:productos' %}" class="boton m-hero__boton">Ver nuestros productos ♥</a>

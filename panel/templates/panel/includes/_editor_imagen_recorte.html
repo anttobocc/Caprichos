@@ -1,23 +1,11 @@
 {% comment %}
-Editor visual de imagen en modo "recorte" (X/Y % + zoom %), reutilizable
-para cualquier imagen que se muestre recortada dentro de una caja de
-aspect-ratio fijo (portada del hero, producto, combo). Ver
-static/js/panel_categoria_imagen.js para la lógica y
-panel/includes/_categoria_panel_campos.html para el equivalente en modo
-"flotante" (imágenes decorativas de categoría/pedidos).
+Editor de imagen en modo "recorte" (posición X/Y y zoom).
 
-Contexto esperado:
-  campo_imagen   -> BoundField del ImageField (ej. form.imagen)
-  campo_pos_x    -> BoundField de la posición X en % (0-100)
-  campo_pos_y    -> BoundField de la posición Y en % (0-100)
-  campo_zoom     -> BoundField del zoom en % (100-200)
-  imagen_actual  -> el ImageField ya resuelto de la instancia (o vacío si es nuevo)
-  aspecto        -> relación de aspecto del recuadro real, ej. "4 / 3" (opcional, default 4/3)
-  etiqueta       -> texto del <label> de la imagen (opcional)
-
-Desde el panel solo se sube la imagen y se arrastra para elegir el
-encuadre: X/Y/zoom viajan como campos ocultos (el zoom conserva el valor
-que ya tenga; se ajusta a mano desde el código).
+Contexto:
+  campo_imagen, campo_pos_x, campo_pos_y, campo_zoom -> campos del formulario
+  imagen_actual -> imagen guardada (vacía si es nuevo)
+  aspecto       -> relación de aspecto, ej. "4 / 3" (opcional)
+  etiqueta      -> texto del <label> (opcional)
 {% endcomment %}
 <div class="admin-field">
     <label>{{ etiqueta|default:"Imagen" }}</label>

@@ -10,9 +10,7 @@ from .models import Pedido
 
 
 class CheckoutForm(forms.ModelForm):
-    # El modelo Pedido guarda nombre/apellido en columnas separadas, pero el
-    # formulario pide un único campo "Nombre y apellido" (pedido explícito):
-    # este campo NO es del modelo, se declara acá y se parte en save().
+    # Campo único que se divide en nombre y apellido al guardar.
     nombre_completo = forms.CharField(label="Nombre y apellido", max_length=201)
 
     class Meta:
@@ -37,9 +35,7 @@ class CheckoutForm(forms.ModelForm):
         self.config = ConfiguracionNegocio.get_solo()
         self.fecha_minima = timezone.localdate() + timedelta(days=self.config.dias_anticipacion_pedido)
         self.dias_maximo = getattr(settings, "MAX_ORDER_ADVANCE_DAYS", 10)
-        # max(...) evita un rango imposible si algún día la anticipación
-        # mínima configurada superara la ventana máxima fija (ver
-        # clean_fecha_pedido): siempre queda al menos fecha_minima disponible.
+        # Garantiza un rango válido aunque la anticipación mínima supere la máxima.
         self.fecha_maxima = max(self.fecha_minima, timezone.localdate() + timedelta(days=self.dias_maximo))
         self.fields["fecha_pedido"].widget.attrs["min"] = self.fecha_minima.isoformat()
         self.fields["fecha_pedido"].widget.attrs["max"] = self.fecha_maxima.isoformat()

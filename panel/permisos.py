@@ -1,10 +1,4 @@
-"""Control de acceso al panel administrativo.
-
-No se usa un campo `rol`: "ser administrador" se resuelve enteramente con
-`is_staff` (y el usuario debe además estar activo). `is_superuser` se deja
-intacto como mecanismo propio de Django (acceso total a /admin/), sin
-mezclarlo con esta condición.
-"""
+"""Control de acceso al panel: requiere un usuario activo con is_staff."""
 from functools import wraps
 
 from django.contrib.auth.decorators import login_required
@@ -16,9 +10,7 @@ def es_administrador(user):
 
 
 def panel_admin_required(view_func):
-    """No autenticado -> redirige a panel:login. Autenticado pero sin
-    permisos (is_staff=False o is_active=False) -> 403, nunca lo deja pasar
-    solo por estar logueado."""
+    """Sin login redirige al login del panel; sin permisos devuelve 403."""
 
     @login_required(login_url="panel:login")
     @wraps(view_func)

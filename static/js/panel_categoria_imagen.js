@@ -1,33 +1,4 @@
-/* Editor visual único de posición de imagen, reutilizado por
- * categorías, la tarjeta "Pedidos", la portada del hero, productos y
- * combos: desde el panel solo se arrastra la imagen para moverla. X/Y y
- * el tamaño/zoom viajan en campos ocultos; el tamaño/zoom no se edita
- * desde el panel (se respeta el valor guardado). Los manejadores de
- * botones/deslizador siguen acá por si algún editor vuelve a mostrarlos.
- *
- * Los campos se ubican por sufijo de nombre ("..._pos_x" / "..._pos_y" y
- * "..._tamano" o "..._zoom") para que un mismo editor sirva a cualquier
- * modelo (Categoria, ConfiguracionNegocio.pedidos_imagen y
- * portada_imagen, Producto y Combo) sin duplicar lógica. Cada editor
- * trabaja sobre el <form> de UNA instancia; como el
- * panel puede mostrar varios editores en la misma página (ej. un
- * acordeón con una fila por categoría), todas las búsquedas de elementos
- * quedan acotadas al propio <div data-imagen-editor> o a su <form> más
- * cercano — nunca a IDs globales — así que son independientes entre sí.
- *
- * Existen dos modos, elegidos con data-modo en el contenedor:
- *
- * - "flotante" (Categoria, "Pedidos"): la imagen es un recorte decorativo
- *   que se sale del borde de su tarjeta. X/Y (0-100 %, 50 = sin ajuste)
- *   se aplican como transform:translate() y el tercer control es un
- *   tamaño absoluto en px (compatible con el sistema ya existente).
- *
- * - "recorte" (portada del hero, Producto, Combo): la imagen llena una
- *   caja de aspect-ratio fijo con object-fit:cover. X/Y (0-100 %, 50 =
- *   centro) son el foco de object-position y el tercer control es un
- *   zoom en % (100 = ajuste normal) aplicado con transform:scale(), sin
- *   deformar ni afectar el layout de la página. El preview usa la MISMA
- *   técnica CSS que el sitio público, así que es una vista fiel. */
+/* Editor visual de posición y tamaño de imagen. */
 (function () {
     "use strict";
 
@@ -69,14 +40,9 @@
         var TERCERO_MAX = numero(campoTercero.max, modo === "flotante" ? 5000 : 200);
         var TERCERO_DEFAULT = numero(campoTercero.value, modo === "flotante" ? 260 : 100);
         var PASO_BOTON = modo === "flotante" ? 1 : 2;
-        // Referencia fija para convertir % <-> px en el preview del modo
-        // "flotante" (ver aplicarPosicion): no depende del tamaño real del
-        // lienzo, que puede ser 0 si el editor arranca oculto.
+        // Referencia fija para convertir % <-> px en el modo "flotante".
         var PIXELES_REFERENCIA_FLOTANTE = 200;
-        // En modo "recorte" arrastrar la imagen hacia la derecha debe
-        // sentirse como "correr la foto" (revela su lado izquierdo, por
-        // eso X baja); en "flotante" el recorte decorativo sigue al mouse
-        // 1 a 1 (arrastrar a la derecha lo mueve a la derecha, X sube).
+        // En modo "recorte" el eje X se invierte al arrastrar.
         var SIGNO = modo === "recorte" ? -1 : 1;
 
         var x = numero(campoX.value, POS_DEFAULT);
@@ -89,10 +55,7 @@
             if (modo === "recorte") {
                 img.style.objectPosition = x + "% " + y + "%";
             } else {
-                // Constante fija (no el tamaño del lienzo): el editor puede
-                // estar oculto (dentro de un panel colapsado) cuando se
-                // calcula esta posición por primera vez, y clientWidth/
-                // Height darían 0 en ese momento.
+                // Constante fija: el editor puede estar oculto y medir 0.
                 var offsetX = ((x - 50) / 100) * PIXELES_REFERENCIA_FLOTANTE;
                 var offsetY = ((y - 50) / 100) * PIXELES_REFERENCIA_FLOTANTE;
                 img.style.transform = "translate(" + offsetX + "px, " + offsetY + "px)";

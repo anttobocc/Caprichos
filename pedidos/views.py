@@ -34,9 +34,7 @@ def _es_ajax(request):
 
 
 def _respuesta_drawer_json(request, error=None):
-    """Arma la respuesta JSON que usa el panel lateral del carrito
-    (static/js/carrito_drawer.js) para refrescarse sin recargar la página:
-    el HTML ya renderizado del drawer + la cantidad total de unidades."""
+    """Respuesta JSON con el HTML del carrito lateral y la cantidad total."""
     if error:
         return JsonResponse({"ok": False, "error": error}, status=400)
     carrito = Carrito(request)
@@ -188,10 +186,7 @@ def checkout(request):
     if request.method == "POST":
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            # Revalidación completa justo antes de confirmar: entre mostrar
-            # el carrito y este POST pudo haber cambiado algo (Etapa 5,
-            # punto 12): se vuelve a resolver todo desde la base, nunca se
-            # confía en lo que se mostró antes.
+            # Se revalida todo contra la base antes de confirmar.
             lineas = carrito.items()
             if not lineas:
                 if es_ajax:

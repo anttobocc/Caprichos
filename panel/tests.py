@@ -172,18 +172,7 @@ class ConfiguracionNegocioPanelTests(TestCase):
 
 
 def datos_formset_variantes(variantes=None, total_forms=None):
-    """Arma los datos de management form + forms del inline de variantes
-    (prefix "variantes"). `variantes` es una lista de dicts con nombre/precio/
-    orden; si viene vacia, se manda TOTAL_FORMS=0 (sin formularios) en vez de
-    un form "extra" sin completar: un form extra recién instanciado trae
-    valores iniciales de los defaults del modelo (orden=0), y compararlos
-    contra un POST vacío hace que Django lo considere "modificado" y dispare
-    validación de campos obligatorios.
-
-    El formulario ya NO expone "activo" (ver [[panel-productos-form-compacto]]):
-    toda variante nueva se crea activa por default del modelo, y una
-    variante existente conserva el "activo" que ya tenía en la base, sin
-    importar lo que se mande acá."""
+    """Datos POST del formset de variantes (prefix "variantes")."""
     variantes = variantes or []
     if total_forms is None:
         total_forms = len(variantes)
@@ -202,9 +191,7 @@ def datos_formset_variantes(variantes=None, total_forms=None):
 
 
 def datos_formset_combo_elecciones(elecciones=None):
-    """Igual criterio que datos_formset_variantes pero para el inline de
-    opciones a elección del combo (prefix "elecciones", campos
-    nombre/productos)."""
+    """Datos POST del formset de opciones a elección del combo."""
     elecciones = elecciones or []
     datos = {
         "elecciones-TOTAL_FORMS": str(len(elecciones)),
@@ -243,9 +230,7 @@ class CategoriaCRUDPanelTests(TestCase):
         self.assertEqual(respuesta.status_code, 403)
 
     def test_admin_crea_categoria(self):
-        # "mostrar_en_productos"/"mostrar_en_inicio" en "on" simulan los
-        # checkboxes tildados por default (el form los inicializa así,
-        # igual que el default=True del modelo) que manda un navegador real.
+        # Checkboxes tildados, como los envía el navegador.
         respuesta = self.client.post(reverse("panel:categoria_crear"), {
             "nombre": "Nueva Categoria Test", "slug": "", "descripcion": "",
             "mostrar_en_productos": "on", "mostrar_en_inicio": "on",
@@ -275,7 +260,7 @@ class CategoriaCRUDPanelTests(TestCase):
         self.assertFalse(categoria.activo)
 
     def test_admin_configura_visibilidad_independiente(self):
-        # Ejemplo del enunciado: mostrar en productos pero no en inicio.
+        # Visible en productos pero no en inicio.
         categoria = crear_categoria_test()
         respuesta = self.client.post(reverse("panel:categoria_editar", args=[categoria.pk]), {
             "nombre": categoria.nombre, "slug": categoria.slug, "descripcion": "",
@@ -375,8 +360,7 @@ class ProductoCRUDPanelTests(TestCase):
         self.assertFalse(Producto.objects.filter(nombre="Producto Panel Test").exists())
 
     def test_e_variantes_nuevas_se_crean_siempre_activas(self):
-        # El formulario ya no expone "activo": toda variante nueva se crea
-        # activa (default del modelo), sin importar que no se mande el campo.
+        # Las variantes nuevas se crean activas.
         datos = self._datos_producto(precio="")
         datos.update(datos_formset_variantes([
             {"nombre": "Cocinadas", "precio": 100, "orden": 0},
@@ -398,8 +382,7 @@ class ProductoCRUDPanelTests(TestCase):
         producto.refresh_from_db()
         self.assertEqual(producto.nombre, "Producto Editado Test")
         self.assertEqual(producto.precio, 750)
-        # El slug no es un campo del formulario: se conserva tal cual pese a
-        # que el nombre cambió, para no romper la URL pública del producto.
+        # El slug no cambia al editar el nombre.
         self.assertEqual(producto.slug, "producto-editar-test")
 
     def test_admin_cambia_categoria_de_producto(self):
@@ -419,9 +402,7 @@ class ProductoCRUDPanelTests(TestCase):
         self.assertEqual(producto.categoria_id, otra_categoria.pk)
 
     def test_admin_edita_variantes_sin_poder_desactivarlas_desde_el_inline(self):
-        # El formulario ya no expone "activo" de la variante: aunque se
-        # edite su precio, el estado activo (True por default) no cambia
-        # porque el campo no forma parte del formset.
+        # Editar el precio no cambia el estado activo.
         producto = Producto.objects.create(
             categoria=self.categoria, nombre="Producto Desactivar Variante Test", slug="producto-desactivar-variante-test",
             unidad_venta="docena", precio=None,
@@ -644,8 +625,7 @@ class ComboCRUDPanelTests(TestCase):
         combo.refresh_from_db()
         self.assertEqual(combo.nombre, "Combo Renombrado Test")
         self.assertEqual(combo.precio_promocional, 1200)
-        # El slug no es un campo visible del formulario: se conserva pese a
-        # que el nombre cambió, para no romper la URL pública del combo.
+        # El slug no cambia al editar el nombre.
         self.assertEqual(combo.slug, "combo-editar-test")
 
     def test_admin_activa_desactiva_combo(self):
@@ -733,8 +713,7 @@ class GestionPedidosPanelTests(TestCase):
         self.assertContains(respuesta, "Detectable")
 
     def test_filtro_por_estado_en_listado(self):
-        # Nombres distintivos: "Pendiente"/"Entregado" a secas también aparecen
-        # como texto de las <option> del selector de estados, sin importar el filtro.
+        # Nombres que no coinciden con las opciones del filtro de estados.
         crear_pedido_test(nombre="PedidoPendienteXYZ", estado=Pedido.Estado.PENDIENTE)
         crear_pedido_test(nombre="PedidoEntregadoXYZ", estado=Pedido.Estado.ENTREGADO)
         respuesta = self.client.get(reverse("panel:pedidos"), {"estado": "entregado"})

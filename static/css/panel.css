@@ -1,9 +1,4 @@
-/* =====================================================================
-   Sistema de diseño del Panel de administración de Capricho (/panel/).
-   Reutiliza la paleta y tipografías de static/css/base.css (misma
-   identidad que la web pública) bajo alias --admin-* para uso semántico
-   dentro del panel. No duplica valores de color: son variables derivadas.
-   ===================================================================== */
+/* ===== Panel de administración ===== */
 
 :root {
     --admin-bg: var(--color-crema);
@@ -154,13 +149,6 @@
 }
 
 /* ===================== Mobile: header + nav off-canvas (≤767px) ===================== */
-/* .panel-header-movil / .panel-nav-movil son elementos NUEVOS, ocultos acá por
-   default (display:none) — NO son .panel-header/.panel-nav reutilizados ni
-   encogidos. Mismo criterio que .home-desktop/.home-mobile en la home pública:
-   dos interfaces separadas conviviendo en el DOM, una sola visible según el
-   ancho de pantalla. En escritorio esto no se ve ni ocupa espacio; en mobile
-   (@media al final de este bloque) se ocultan .panel-header/.panel-nav
-   originales y se muestran estos en su lugar. */
 .panel-header-movil {
     display: none;
     align-items: center;
@@ -478,9 +466,6 @@
 }
 
 /* ================================== Toasts =================================== */
-/* Notificaciones de éxito/error/aviso: no bloquean la pantalla ni el resto de
-   la interfaz (a diferencia del modal de confirmación de eliminar). Mismo
-   estilo que .admin-alert, solo cambia la posición/comportamiento. */
 .admin-toasts {
     position: fixed;
     top: 20px;
@@ -888,8 +873,6 @@
         height: 46px;
     }
 
-    /* El footer del panel de edición inline queda siempre alcanzable aunque
-       el formulario sea largo (variantes, editor de imagen, etc.). */
     .admin-panel-form__footer {
         position: sticky;
         bottom: 0;
@@ -987,8 +970,6 @@ fieldset.admin-fieldset .admin-field__ayuda--intro {
     text-align: center;
 }
 
-/* Los datos siguen la misma alineación centrada que los títulos (en
-   mobile, la vista de tarjetas de más abajo vuelve a pisar esto). */
 .admin-table--categorias tbody td {
     text-align: center;
 }
@@ -1104,15 +1085,6 @@ tr[data-categoria-fila].admin-fila--arrastrando {
 }
 
 /* ============ Tablas de listado -> tarjetas en mobile (≤640px) ============ */
-/* Opt-in vía .admin-table--tarjetas-movil (solo tablas de lectura: dashboard,
-   productos, categorías, combos, pedidos, usuarios) + data-label="Columna" en
-   cada <td> de datos. Las tablas de formset editable (ítems de combo, líneas
-   de pedido, variantes) NO llevan esta clase y se quedan con el scroll
-   horizontal de .admin-table-scroll de siempre. Técnica CSS estándar: thead
-   oculto, cada <tr> pasa a ser una tarjeta con borde/sombra, cada <td> pasa a
-   ser una fila "etiqueta: valor" vía ::before + attr(data-label). No cambia
-   el DOM real ni el JS de arrastre (getBoundingClientRect sigue funcionando
-   igual con filas en display:block, ver panel_categorias_orden.js). */
 @media (max-width: 640px) {
     .admin-table-wrap:has(.admin-table--tarjetas-movil) {
         background: transparent;
@@ -1437,10 +1409,6 @@ dialog.admin-modal::backdrop {
     margin-top: 18px;
 }
 
-/* Modal -> bottom sheet en mobile (≤640px): mismo <dialog>, mismo backdrop,
-   solo cambia de dónde y cómo se ancla + los botones pasan a ancho completo
-   apilados para tocarlos cómodo. Se agrega el botón "✕" (oculto en
-   escritorio) para tener un cierre explícito además de "Cancelar". */
 @media (max-width: 640px) {
     dialog.admin-modal {
         position: fixed;
@@ -1564,9 +1532,6 @@ dialog.admin-modal::backdrop {
 }
 
 /* ============================ Layout lista + formulario ============================ */
-/* El formulario de alta/edición ya no es un drawer superpuesto: es un panel más
-   dentro del layout de la página, a la derecha de la lista (mismo look de
-   tarjeta que el resto del panel: borde, radio y sombra ya definidos). */
 .admin-lista-con-formulario {
     display: grid;
     grid-template-columns: 1fr;
@@ -1760,8 +1725,6 @@ dialog.admin-modal::backdrop {
     cursor: default;
 }
 
-/* Sin modalidad (tartas, alfajores, pastafrolas...): la columna se oculta
-   y la fila queda en handle | variante | precio | eliminar. */
 .admin-variantes--sin-modalidad .admin-variante-fila {
     grid-template-columns: auto 1fr 1fr auto;
 }
@@ -1920,11 +1883,6 @@ dialog.admin-modal::backdrop {
     cursor: grabbing;
 }
 
-/* Modo "recorte" (portada del hero, productos, combos): la caja del
-   preview respeta la misma relación de aspecto que su lugar real en el
-   sitio (ver data-aspecto en el template) y la imagen llena esa caja con
-   object-fit:cover + object-position/scale — la MISMA técnica que usa el
-   frontend público, así que el preview es una vista fiel del resultado. */
 .admin-imagen-editor[data-modo="recorte"] .admin-imagen-editor__lienzo {
     height: auto;
     aspect-ratio: var(--admin-editor-aspecto, 4 / 3);
@@ -2043,10 +2001,6 @@ dialog.admin-modal::backdrop {
     flex-shrink: 0;
 }
 
-/* Controles táctiles más grandes en mobile: los botones −/+/↑/↓ de 30px son
-   difíciles de tocar con el dedo, y la caja X/Y de categoría (lado a lado
-   siempre hoy) se apila para no quedar apretada en 320-430px. No se toca la
-   lógica de arrastre/zoom de panel_categoria_imagen.js, solo tamaños. */
 @media (max-width: 640px) {
     .admin-imagen-editor__boton {
         width: 44px;
@@ -2075,8 +2029,6 @@ dialog.admin-modal::backdrop {
 }
 
 /* ==================== Formulario de Categoría (encabezados + cajas) ==================== */
-/* Propio de _categoria_panel_campos.html: producto/portada/pedidos siguen
-   con la presentación original del mismo data-imagen-editor/ImagenSimpleWidget. */
 .admin-seccion-titulo {
     display: flex;
     align-items: center;
@@ -2109,9 +2061,6 @@ dialog.admin-modal::backdrop {
     gap: 8px;
 }
 
-/* Botón "Seleccionar archivo" con acento terracota + ícono, solo acá
-   (el widget/HTML es el mismo ImagenSimpleWidget compartido con Producto;
-   esto es puramente CSS scoped al contenedor de Categoría). */
 .admin-imagen-editor--categoria .admin-imagen-archivo__boton {
     color: var(--admin-terracota) !important;
     border-color: var(--admin-terracota);
@@ -2132,8 +2081,6 @@ dialog.admin-modal::backdrop {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 9l5-5 5 5M4 20h16'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-/* Caja de Posición X / Posición Y lado a lado con divisor, igual estética
-   que las cajas de Visibilidad de abajo. */
 .admin-imagen-caja {
     display: flex;
     align-items: stretch;
@@ -2162,8 +2109,6 @@ dialog.admin-modal::backdrop {
     background: var(--admin-border);
 }
 
-/* Filas de Visibilidad: texto explicativo a la izquierda, nombre + checkbox
-   a la derecha, en una caja clickeable completa (mismo <label>). */
 .admin-visibilidad-lista {
     display: flex;
     flex-direction: column;
@@ -2305,8 +2250,6 @@ dialog.admin-modal::backdrop {
     }
 }
 
-/* Escala de espaciado mobile: margen lateral general ~16-20px, sin que nada
-   toque el borde de la pantalla. */
 @media (max-width: 767px) {
     .panel-main {
         padding: 20px 16px 48px;
@@ -2329,9 +2272,6 @@ dialog.admin-modal::backdrop {
 }
 
 @media (max-width: 640px) {
-    /* .panel-header/.panel-nav (escritorio) ya están display:none a
-       ≤767px (ver bloque "Mobile: header + nav off-canvas" más arriba),
-       reemplazados por .panel-header-movil/.panel-nav-movil. */
 
     .admin-page-header {
         align-items: flex-start;
@@ -2411,8 +2351,6 @@ dialog.admin-modal::backdrop {
     flex-shrink: 0;
 }
 
-/* Los campos ocupan todo el ancho de la tarjeta (sin máximos fijos) para
-   no dejar un hueco vacío a la derecha en pantallas anchas. */
 .config-form__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2452,8 +2390,6 @@ dialog.admin-modal::backdrop {
 }
 
 /* ===================== Combo: opciones a elección ===================== */
-/* Una tarjeta por producto "a elección" (nombre + categoría + sabores),
-   ver _combo_panel_campos.html y panel_combo_elecciones.js. */
 .admin-elecciones {
     display: flex;
     flex-direction: column;

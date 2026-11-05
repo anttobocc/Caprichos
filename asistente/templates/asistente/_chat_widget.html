@@ -1,9 +1,5 @@
 {% load static %}
-{% comment %}
-Asistente virtual de Capricho (n8n + IA). Solo se muestra si está
-configurada N8N_CHAT_WEBHOOK_URL en el .env. El navegador le envía al
-webhook de n8n {"pregunta", "sessionId"} y n8n responde {"respuesta"}.
-{% endcomment %}
+{# Chat del asistente. Solo se muestra si N8N_CHAT_WEBHOOK_URL está configurada. #}
 {% if n8n_chat_webhook_url %}
 <link rel="stylesheet" href="{% static 'css/asistente.css' %}">
 <div class="asistente" data-asistente

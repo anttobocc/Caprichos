@@ -48,9 +48,7 @@ def crear_combo(**kwargs):
 
 
 def crear_eleccion(combo, nombre, sabores, categoria_nombre="Tartas"):
-    """Crea una opción a elección con un producto activo por sabor, dentro
-    de la categoría indicada (ej. "Tarta de frutilla" en "Tartas", que se
-    muestra al cliente como "Frutilla")."""
+    """Crea una opción a elección con un producto por sabor en la categoría dada."""
     categoria, _ = Categoria.objects.get_or_create(
         nombre=categoria_nombre, defaults={"slug": slugify(categoria_nombre)},
     )

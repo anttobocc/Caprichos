@@ -1,13 +1,4 @@
-"""Filtros de presentación para nombres de producto.
-
-Estos filtros NUNCA tocan el valor almacenado en la base de datos: solo
-recortan el texto que se muestra en pantalla cuando la categoría del
-producto ya es evidente por el contexto (encabezado de grupo, breadcrumb,
-etc.). Si el nombre del producto no empieza con el nombre de su categoría
-(en singular o plural), se devuelve el nombre completo sin modificar, para
-que el helper sea seguro con categorías/productos nuevos que no sigan la
-convención "Categoría de algo".
-"""
+"""Filtros de presentación para nombres de producto."""
 from django import template
 
 register = template.Library()
@@ -48,12 +39,7 @@ def quitar_prefijo_categoria(nombre, categoria_nombre):
 
 @register.filter
 def nombre_sin_categoria(producto):
-    """Nombre del producto sin repetir el nombre de su categoría.
-
-    Uso: {{ producto|nombre_sin_categoria }} en un contexto donde la
-    categoría ya se muestra aparte (encabezado de grupo, breadcrumb, etc.).
-    No modifica producto.nombre; solo devuelve un string para mostrar.
-    """
+    """Nombre del producto sin el prefijo de su categoría (solo para mostrar)."""
     categoria = getattr(producto, "categoria", None)
     if categoria is None:
         return getattr(producto, "nombre", producto)

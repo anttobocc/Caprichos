@@ -1,11 +1,7 @@
 {% comment %}
-Switch ON/OFF reutilizable. Hace POST real a la vista de toggle existente
-(reutiliza la misma lógica de backend que antes usaban los botones
-Activar/Desactivar: un checkbox sin marcar simplemente no viaja en el POST).
-
-Uso:
-{% include "panel/includes/_switch.html" with accion_url=... activo=objeto.activo %}
-Parámetro opcional "campo" (default "activo") si el campo en el backend se llama distinto.
+Switch ON/OFF que envía un POST a la vista de toggle.
+Uso: {% include "panel/includes/_switch.html" with accion_url=... activo=objeto.activo %}
+Opcional: "campo" (por defecto "activo").
 {% endcomment %}
 <form method="post" action="{{ accion_url }}" class="admin-switch-form">
     {% csrf_token %}

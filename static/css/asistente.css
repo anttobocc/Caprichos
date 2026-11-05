@@ -1,8 +1,6 @@
-/* ===== Asistente Capricho (chat con n8n) ===== */
+/* ===== Asistente ===== */
 
 .asistente {
-    /* body tiene zoom: 0.67 (base.css); esto lo compensa para que el chat
-       se vea a tamaño real en cualquier pantalla. */
     zoom: 1.4925;
     position: fixed;
     right: 20px;

@@ -1,21 +1,4 @@
-/* =====================================================================
-   Capa de movimiento del sitio público (ver static/js/movimiento.js).
-
-   Cada animación tiene un motivo:
-   - Portada: el texto entra escalonado y la foto se asienta, una sola vez
-     al cargar (primera impresión, no se repite).
-   - Secciones y tarjetas: aparecen al entrar en pantalla, escalonadas,
-     para que la vista siga el orden de lectura.
-   - Hover en tarjetas: se elevan y la foto se acerca apenas, para indicar
-     que son clickeables.
-   - Botones y chips: se achican un poco al presionarlos (confirma el clic).
-   - Contador del carrito: "salta" cuando cambia (confirma que se agregó).
-
-   Solo se animan transform/translate/scale/opacity. Las fotos ya usan
-   "transform" para el encuadre que se ajusta desde el panel, así que el
-   movimiento usa las propiedades individuales "translate" y "scale", que
-   se suman a ese transform sin pisarlo.
-   ===================================================================== */
+/* ===== Animaciones del sitio público ===== */
 
 :root {
     --mov-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -82,12 +65,7 @@
         to { opacity: 1; }
     }
 
-    /* ---------- Aparición al hacer scroll ----------
-       "con-js" lo agrega un script en el <head>, así que sin JavaScript
-       todo se ve normal. La lista de selectores es la misma que
-       SELECTORES en movimiento.js: el CSS los oculta desde el primer
-       pintado y el JS les agrega "revelado" al entrar en pantalla (y
-       --mov-i para escalonar). */
+    /* ---------- Aparición al hacer scroll ---------- */
     .con-js :is(.seccion-titulo, .categoria-card, .producto-card, .m-card, .producto-detalle__imagen, .producto-detalle__info, .pagina-listado h1, .categorias-nav) {
         opacity: 0;
         translate: 0 18px;
@@ -132,8 +110,6 @@
             box-shadow 280ms ease;
     }
 
-    /* Las tarjetas reveladas tienen además su propia transición de
-       aparición; se combinan acá para que una no anule a la otra. */
     .con-js .producto-card,
     .con-js .categoria-card {
         transition:

@@ -1,33 +1,13 @@
-"""Carrito de compras basado en sesión de Django.
+"""Carrito de compras guardado en la sesión.
 
-La sesión guarda únicamente identificadores y cantidades:
+La sesión guarda solo identificadores y cantidades:
 
     {"<producto_id>:<variante_id o vacío>": cantidad}
     {"combo:<combo_id>": cantidad}
     {"combo:<combo_id>:<huella>": cantidad}   (combo con opciones a elección)
 
-Las opciones elegidas de un combo viven aparte, en otra clave de sesión
-({clave: [[nombre_eleccion, opcion], ...]}), y la clave del carrito lleva
-una huella de esas opciones: el mismo combo con opciones distintas ocupa
-líneas distintas, y la clave sigue siendo segura para usar en la URL.
-
-El precio NUNCA se guarda en la sesión: Carrito.items() y Carrito.total()
-siempre vuelven a consultar Producto/VarianteProducto/Combo en la base para
-resolver el precio vigente. Esto es intencional (ver Etapa 4 y Etapa 5):
-producto sin variantes -> Producto.precio; producto con variantes activas
--> VarianteProducto.precio; combo -> Combo.precio_promocional; nunca una
-tercera fuente.
-
-Las claves de producto son siempre "<id-numérico>:<...>", así que el prefijo
-"combo:" (nunca numérico) no puede colisionar con ninguna clave de producto
-ya guardada en una sesión existente — es 100% aditivo.
-
-"activo" y "disponible" son conceptos distintos: un producto/variante
-inactivo no puede permanecer en el carrito (se quita solo); un producto
-"no disponible" sí permanece visible, pero bloquea el checkout. Combo no
-tiene esa segunda distinción: si no está activo, la línea se descarta
-directamente en Carrito.items(), así que una LineaCarritoCombo resuelta
-siempre está disponible.
+Las opciones elegidas de cada combo se guardan en otra clave de sesión.
+Los precios no se guardan: se leen siempre de la base al resolver el carrito.
 """
 import hashlib
 import json
@@ -51,10 +31,7 @@ def _clave_combo(combo_id, elecciones=()):
 
 
 def _elecciones_vigentes(combo, elecciones):
-    """True si `elecciones` sigue cubriendo exactamente las opciones a
-    elección actuales del combo (mismas elecciones, en el mismo orden, y
-    cada opción todavía existe). Si el panel las cambió después de que el
-    cliente agregó el combo, la línea ya no es válida."""
+    """True si las opciones elegidas siguen coincidiendo con las del combo."""
     vigentes = list(combo.elecciones.all())
     if len(vigentes) != len(elecciones):
         return False
@@ -97,11 +74,7 @@ class LineaCarrito:
 
 
 class LineaCarritoCombo:
-    """Línea de carrito para un Combo — misma interfaz que LineaCarrito
-    (clave/cantidad/nombre/imagen/precio_unitario/subtotal/disponible) para
-    que las plantillas del carrito no necesiten ramificar por tipo.
-    `variante` siempre es None: los combos no tienen variantes; en su lugar
-    `elecciones` guarda las opciones elegidas ([[nombre, opcion], ...])."""
+    """Línea de carrito para un combo, con la misma interfaz que LineaCarrito."""
 
     def __init__(self, clave, combo, cantidad, elecciones=()):
         self.clave = clave
@@ -150,20 +123,14 @@ class Carrito:
         self.session.modified = True
 
     def agregar(self, producto, variante=None, cantidad=1):
-        """Agrega `cantidad` unidades de `producto`/`variante` al carrito.
-        No valida activo/disponible: eso es responsabilidad de la vista,
-        que ya tuvo que resolver `producto`/`variante` desde la base antes
-        de llamar acá."""
+        """Agrega un producto o variante. La validación queda a cargo de la vista."""
         datos = self._datos()
         clave = _clave(producto.pk, variante.pk if variante else None)
         datos[clave] = datos.get(clave, 0) + cantidad
         self._guardar()
 
     def agregar_combo(self, combo, cantidad=1, elecciones=()):
-        """Agrega `cantidad` unidades de `combo` al carrito, con las opciones
-        elegidas ([[nombre_eleccion, opcion], ...]). Misma no-validación que
-        `agregar()`: la vista ya resolvió `combo` (activo) y validó las
-        opciones antes de llamar."""
+        """Agrega un combo con sus opciones elegidas. La validación queda a cargo de la vista."""
         elecciones = [list(par) for par in elecciones]
         datos = self._datos()
         clave = _clave_combo(combo.pk, elecciones)
@@ -199,12 +166,8 @@ class Carrito:
         return len(self._datos()) == 0
 
     def items(self, mensajes=None):
-        """Devuelve la lista de LineaCarrito vigentes, resolviendo cada
-        producto/variante contra la base de datos. Si un producto o su
-        variante ya no existen o quedaron inactivos, se eliminan
-        silenciosamente de la sesión (opcionalmente se agrega un aviso a
-        `mensajes`, una lista donde la vista puede acumular textos para
-        mostrar con el framework de mensajes)."""
+        """Líneas vigentes del carrito. Quita de la sesión los productos inexistentes
+        o inactivos y agrega un aviso en `mensajes` si se recibe."""
         datos = self._datos()
         lineas = []
         claves_a_quitar = []

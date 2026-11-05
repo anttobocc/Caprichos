@@ -6,10 +6,6 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% comment %}
-    Habilita el control "− N +" en esta página (carrito.html); el resto de
-    la lógica del drawer no aplica acá porque esta página no incluye el
-    header/drawer de catalogo/base_catalogo.html.
-    {% endcomment %}
+    {# Control de cantidad del carrito. #}
     <script src="{% static 'js/carrito_drawer.js' %}" defer></script>
 {% endblock %}

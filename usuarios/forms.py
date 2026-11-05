@@ -6,9 +6,7 @@ from .models import Perfil
 
 
 class RegistroForm(UserCreationForm):
-    """Alta de cliente. Nunca crea administradores: is_staff/is_superuser
-    no son campos de este formulario, así que un POST manipulado no
-    tiene ningún efecto sobre ellos."""
+    """Registro de clientes. No permite asignar permisos de administración."""
 
     email = forms.EmailField(required=False)
     telefono = forms.CharField(max_length=30, required=False)
@@ -30,8 +28,7 @@ class RegistroForm(UserCreationForm):
 
 
 class PerfilForm(forms.ModelForm):
-    """Edición de los datos propios del cliente: los de User y los de Perfil
-    combinados en un único formulario."""
+    """Edición de los datos del cliente (User y Perfil)."""
 
     first_name = forms.CharField(max_length=150, required=False, label="Nombre")
     last_name = forms.CharField(max_length=150, required=False, label="Apellido")

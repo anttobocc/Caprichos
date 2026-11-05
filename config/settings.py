@@ -46,8 +46,7 @@ SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
-# HSTS (Unidad 9 · SEO técnico / seguridad): le indica al navegador que el
-# sitio siempre se usa por HTTPS. Solo en producción.
+# HSTS (solo en producción).
 SECURE_HSTS_SECONDS = 0 if DEBUG else 60 * 60 * 24 * 365
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
@@ -170,7 +169,5 @@ MIN_ORDER_ADVANCE_DAYS = 1
 MAX_ORDER_ADVANCE_DAYS = 10
 
 
-# Asistente virtual (n8n). URL de producción del Webhook del workflow
-# "Capricho – Asistente" (ver asistente/n8n/). Si está vacía, el chat no
-# se muestra en el sitio.
+# Webhook de n8n para el asistente. Si está vacía, el chat no se muestra.
 N8N_CHAT_WEBHOOK_URL = os.getenv('N8N_CHAT_WEBHOOK_URL', '')

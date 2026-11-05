@@ -1,12 +1,4 @@
-"""Información pública del negocio para el asistente de n8n.
-
-El workflow de n8n (asistente/n8n/capricho_asistente.json) consulta esta
-URL en cada mensaje antes de llamar a la IA, así el asistente responde
-siempre con los productos, precios y reglas que están cargados en el
-panel, sin tener que copiar nada a mano en n8n.
-
-Solo expone datos que ya son públicos en el catálogo.
-"""
+"""Catálogo y datos del negocio en JSON para el asistente de n8n."""
 from django.conf import settings
 from django.http import JsonResponse
 from django.urls import reverse

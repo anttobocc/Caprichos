@@ -1,10 +1,4 @@
-"""Sitemap del sitio público (Unidad 9 · SEO técnico).
-
-Solo se listan páginas que tiene sentido que Google indexe: inicio,
-listado de productos, categorías, productos y combos activos. El panel,
-el carrito, el checkout y las páginas de usuario quedan afuera (y además
-están bloqueadas en robots.txt).
-"""
+"""Sitemap del sitio público: inicio, productos, categorías y combos activos."""
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse

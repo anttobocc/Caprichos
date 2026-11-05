@@ -1,16 +1,4 @@
-{% comment %}
-Contenido del panel lateral del carrito. Se usa en tres lugares:
-- base_catalogo.html lo incluye directamente (primer render de cada página).
-- pedidos/views.py lo vuelve a renderizar (render_to_string) y lo manda como
-  "html" en la respuesta JSON de carrito_agregar/carrito_actualizar/
-  carrito_eliminar, para refrescar el panel sin recargar la página.
-- El propio carrito_checkout_form (ver pedidos/context_processors.py) se
-  usa acá para pedir nombre/apellido/teléfono/fecha SIN salir del carrito:
-  es el mismo CheckoutForm que ya validaba esto (anticipación mínima,
-  etc.) en el checkout de página completa — no hay lógica duplicada.
-Espera en el contexto: carrito_lineas, carrito_total,
-carrito_hay_no_disponibles, carrito_checkout_form.
-{% endcomment %}
+{# Contenido del carrito lateral. #}
 {% if not carrito_lineas %}
 <div class="carrito-drawer__vacio">
     <p>Tu carrito está vacío.</p>

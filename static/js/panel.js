@@ -1,12 +1,4 @@
-/* Componentes reutilizables del panel de Capricho.
- *
- * Modal (confirmaciones): cualquier botón con data-modal-target="#id-del-dialog"
- * abre ese <dialog>. data-modal-close cierra el <dialog> más cercano.
- *
- * Panel de formulario (alta/edición, integrado en el layout de la página, no
- * es un drawer/overlay): cualquier botón con data-panel-target="#id-del-panel"
- * muestra ese panel dentro de su contenedor ".admin-lista-con-formulario" y
- * oculta los demás paneles del mismo contenedor. data-panel-close lo oculta. */
+/* Componentes del panel de administración. */
 (function () {
     "use strict";
 
@@ -38,10 +30,7 @@
         }
     }
 
-    /* Nav off-canvas mobile (header ☰, ver base_panel.html/panel.css): no depende
-     * del ancho de pantalla acá, solo de que exista el marcado (en escritorio
-     * .panel-header-movil/.panel-nav-movil están display:none, así que el botón
-     * que abre esto ni se ve). */
+    /* Navegación lateral en mobile. */
     function abrirNavMovil() {
         const nav = document.querySelector(".panel-nav-movil");
         const backdrop = document.querySelector(".panel-nav-backdrop");
@@ -127,9 +116,7 @@
         }
     });
 
-    /* Toasts: no bloquean la pantalla ni requieren "Aceptar" (a diferencia
-     * del modal de confirmación de eliminar). Se quitan solos a los pocos
-     * segundos o al hacer clic en la X. */
+    /* Toasts: se ocultan solos después de unos segundos. */
     function quitarToast(toast) {
         if (!toast || toast.dataset.saliendo) {
             return;

@@ -4,10 +4,7 @@ from .models import Pedido
 
 
 def costo_envio(config, tipo_entrega, subtotal):
-    """Servidor calcula el costo de envío, nunca se confía en el frontend.
-    Compartido entre views.py (cálculo real al confirmar) y
-    context_processors.py (estimación mostrada en el drawer antes de
-    confirmar), para no duplicar esta regla en dos lugares."""
+    """Costo de envío, calculado siempre en el servidor."""
     if tipo_entrega != Pedido.TipoEntrega.ENVIO:
         return Decimal("0")
     if not config.envio_habilitado:

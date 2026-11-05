@@ -1,15 +1,4 @@
-/* Panel lateral del carrito (drawer desde la derecha), checkout inline
- * (sin página aparte) y el control de cantidad "− N +" reutilizable en
- * cualquier página (detalle de producto, carrito, drawer).
- *
- * El drawer ya viene renderizado en el HTML de cada página (ver
- * base_catalogo.html + pedidos/_carrito_drawer.html vía el context
- * processor carrito_resumen), así que abrirlo es solo mostrar/animar el
- * panel que ya existe. Al agregar/quitar/actualizar un producto, o al
- * finalizar el pedido, el servidor devuelve el panel (o la confirmación)
- * ya renderizado de nuevo (HTML) más la cantidad total, y acá simplemente
- * se reemplaza el contenido: la sesión y la base de datos siguen siendo
- * la única fuente de verdad, esto solo evita la recarga completa. */
+/* Carrito lateral, checkout inline y control de cantidad. */
 (function () {
     "use strict";
 
@@ -23,9 +12,7 @@
             return;
         }
         el.hidden = false;
-        // Fuerza el reflow antes de agregar la clase para que la transición
-        // de entrada (translateX) se dispare siempre, incluso si el panel
-        // acababa de quedar "hidden" recién ahora.
+        // Fuerza el reflow para que la transición de entrada se ejecute.
         void el.offsetWidth;
         el.classList.add("carrito-drawer--abierto");
         document.body.classList.add("carrito-drawer-abierto");
@@ -93,19 +80,13 @@
                 return resultado.datos;
             })
             .catch(function () {
-                // Sin JS/red: se comporta como un form normal (recarga y
-                // redirige), igual que antes de este panel.
+                // Si falla la petición, se envía el formulario normalmente.
                 form.submit();
             });
     }
 
     /* ------------------------------ Stepper "− N +" ------------------------------ */
-    /* Reutilizable en cualquier página: solo necesita que el botón −/+ esté
-     * dentro del mismo contenedor que un input [data-stepper-valor]. Si ese
-     * contenedor es, además, un <form data-carrito-actualizar-form>, cada
-     * cambio dispara de una la actualización real del carrito (AJAX); en
-     * cualquier otro lado (ej. el formulario de "Agregar al carrito" de la
-     * página de producto) solo ajusta el número, sin enviar nada. */
+    /* Control de cantidad −/+ sobre un input [data-stepper-valor]. */
     function ajustarStepper(boton, delta) {
         var contenedor = boton.closest(".stepper-cantidad");
         if (!contenedor) {
@@ -157,11 +138,7 @@
     });
 
     /* ------------------------------ Modo de entrega (retiro/envío) ------------------------------ */
-    /* Muestra/oculta "Dirección de envío" y recalcula el total mostrado
-     * (subtotal + costo de envío) según el radio elegido. El total real
-     * SIEMPRE se recalcula en el servidor al confirmar (ver
-     * pedidos/views.py checkout() y _costo_envio); esto solo evita que el
-     * cliente vea un total desactualizado antes de enviar el formulario. */
+    /* Muestra la dirección de envío y actualiza el total estimado. */
     function actualizarEntrega(form) {
         if (!form) {
             return;
@@ -196,9 +173,7 @@
 
     /* ------------------------------ Formularios ------------------------------ */
     document.addEventListener("submit", function (evento) {
-        // Actualizar cantidad desde el drawer (también se dispara solo,
-        // sin submit, desde el stepper de arriba — este listener cubre el
-        // caso sin JS-stepper, ej. si el input se edita a mano).
+        // Actualizar cantidad desde el carrito lateral.
         var formActualizar = evento.target.closest("[data-carrito-actualizar-form]");
         if (formActualizar) {
             evento.preventDefault();

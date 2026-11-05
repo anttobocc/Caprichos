@@ -23,9 +23,7 @@ from django.views.decorators.cache import cache_page
 from seo.sitemaps import SITEMAPS
 from seo.views import robots_txt
 
-# El Django Admin predeterminado (django.contrib.admin) no se expone como
-# interfaz administrativa: toda la gestión del sitio vive en /panel/, la
-# app propia de Capricho. Ver panel/urls.py.
+# La administración se hace desde /panel/; el admin de Django no se expone.
 urlpatterns = [
     path('robots.txt', robots_txt, name='robots_txt'),
     path('sitemap.xml', cache_page(60 * 60)(sitemap), {'sitemaps': SITEMAPS},

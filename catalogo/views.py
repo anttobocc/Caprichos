@@ -22,9 +22,7 @@ def lista_productos(request):
     if categoria_slug:
         categoria_actual = get_object_or_404(Categoria, slug=categoria_slug, activo=True, mostrar_en_productos=True)
         productos = productos.filter(categoria=categoria_actual)
-    # Combo no tiene categoría propia, así que solo aparece en el listado
-    # general ("Todos"): en cuanto se filtra por una categoría puntual se
-    # excluye naturalmente, sin necesidad de un caso especial en el filtro.
+    # Los combos no tienen categoría: solo aparecen en el listado general.
     combos = Combo.objects.filter(activo=True) if not categoria_actual else Combo.objects.none()
     return render(request, "catalogo/productos_lista.html", {
         "productos": productos,
@@ -35,8 +33,7 @@ def lista_productos(request):
 
 
 def combos_publico(request):
-    # Los combos ya se muestran en su sección del inicio: esta URL queda
-    # solo para no romper enlaces viejos y lleva directo a esa sección.
+    # Redirige a la sección de combos del inicio.
     return redirect(f"{reverse('catalogo:home')}#combos")
 
 
@@ -61,9 +58,7 @@ def producto_detalle(request, slug):
     contexto = {"producto": producto, "variantes": variantes}
 
     if variantes is not None and producto.tiene_modalidad:
-        # Empanadas y cualquier otro producto con dos ejes de compra
-        # (cantidad x modalidad): se arman dos selectores independientes en
-        # vez de una lista plana de combinaciones (ver VarianteProducto).
+        # Productos con dos ejes de compra: un selector por eje.
         cantidades, vistas_cantidades = [], set()
         modalidades, vistas_modalidades = [], set()
         mapa = {}

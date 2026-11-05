@@ -1,14 +1,4 @@
-/* Reordena las categorías de la lista del panel arrastrando su fila (mismo
- * concepto que las variantes de producto): cada fila tiene un handle
- * "⠿⠿" (data-arrastrar); al soltarla se guarda automáticamente el nuevo
- * orden vía POST a panel:categoria_reordenar. Las filas "Pedidos" y
- * "Portada / Hero" viven en un <tbody> aparte y nunca participan de esto.
- *
- * Un solo estado de arrastre a nivel módulo (no una closure por
- * pointerdown): si se usara una closure por fila y un drag quedara
- * interrumpido sin pointerup, el listener quedaría pegado escuchando y un
- * mousemove de OTRA fila podría reescribir el arrastre equivocado (el
- * mismo bug que tenía el reordenamiento de variantes antes de corregirlo). */
+/* Reordena las categorías arrastrando las filas. */
 (function () {
     "use strict";
 
@@ -42,9 +32,7 @@
             credentials: "same-origin",
             body: JSON.stringify({ orden: ids }),
         }).catch(function () {
-            /* Sin conexión o error de red: la fila ya quedó visualmente
-             * reordenada: el próximo drag u otra acción con éxito vuelve
-             * a intentar guardar el estado real. */
+            /* Error de red: se vuelve a guardar en el próximo cambio. */
         });
     }
 

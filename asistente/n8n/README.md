@@ -2,8 +2,7 @@
 
 Chat flotante en el sitio que responde consultas de clientes (productos,
 precios, envíos, anticipación, cómo pedir) usando un workflow de n8n con
-un agente de IA. Basado en el proyecto "Chat Servicio Técnico PC – n8n",
-adaptado a Capricho.
+un agente de IA.
 
 ## Cómo funciona
 
@@ -56,7 +55,7 @@ El nodo Webhook tiene en *Options → Allowed Origins* los dominios que
 pueden llamar al chat (`https://capricho.pythonanywhere.com` y localhost
 para pruebas). Si cambiás de dominio, agregalo ahí.
 
-### Probar desde PowerShell (como en la clase)
+### Probar desde PowerShell
 
 ```powershell
 $body = @{ pregunta = "¿Qué empanadas tienen?"; sessionId = "prueba-1" } | ConvertTo-Json

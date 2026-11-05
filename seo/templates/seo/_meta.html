@@ -1,9 +1,6 @@
 {% load static %}{% comment %}
-Etiquetas SEO de cada página (Unidad 9 · SEO On-Page).
-Variables opcionales: seo_titulo, seo_descripcion, seo_imagen (URL
-relativa o absoluta), seo_tipo ("website" / "product").
-Las páginas del panel, carrito/pedidos y usuarios se marcan noindex
-(seo/context_processors.py) y no llevan canónica.
+Etiquetas SEO de cada página.
+Variables opcionales: seo_titulo, seo_descripcion, seo_imagen, seo_tipo ("website" / "product").
 {% endcomment %}{% with titulo=seo_titulo|default:"Capricho | Boutique Empanadas & Bakery en Corrientes" descripcion=seo_descripcion|default:"Capricho, boutique de empanadas y pastelería artesanal en Corrientes. Empanadas, tartas, budines y combos por encargo, con retiro o envío a domicilio. Hacé tu pedido online." %}
     <meta name="description" content="{{ descripcion }}">
     {% if seo_noindex %}<meta name="robots" content="noindex, nofollow">

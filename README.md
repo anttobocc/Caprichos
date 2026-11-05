@@ -235,8 +235,6 @@ Caprichos.Store.Ctes/
 
 ## 🔎 SEO
 
-Aplicado según la Unidad 9 (SEO y Servidores):
-
 - **On-Page**: título y meta description propios en cada página (productos con nombre, precio y ciudad), un solo `<h1>` por página, `alt` descriptivo y `loading="lazy"` en imágenes, URLs amigables con slug.
 - **Técnico**: `/sitemap.xml` automático (inicio, productos, categorías y combos activos), `/robots.txt` que bloquea panel, carrito, checkout y cuentas, URL canónica, HTTPS + HSTS en producción, `noindex` en páginas privadas.
 - **Local**: datos estructurados `Bakery` (schema.org) con nombre, dirección, WhatsApp y zona de envío; `Product` con precio en ARS en cada producto y combo. Open Graph para compartir en WhatsApp/Instagram.

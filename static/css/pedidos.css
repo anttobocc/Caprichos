@@ -2,9 +2,6 @@
     width: 60px;
 }
 
-/* Mismo control "− N +" que en el drawer/detalle de producto (ver
-   static/css/catalogo.css); se repite acá porque esta página no carga
-   catalogo.css. */
 .stepper-cantidad {
     display: inline-flex;
     align-items: center;

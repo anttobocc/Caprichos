@@ -1,16 +1,8 @@
-/* Aparición al hacer scroll (ver static/css/movimiento.css).
- *
- * movimiento.css oculta estos bloques desde el primer pintado (misma
- * lista que SELECTORES); acá, con IntersectionObserver, se les agrega
- * "revelado" la primera vez que entran
- * en pantalla (una sola vez: volver a subir no los vuelve a animar).
- * Las tarjetas hermanas reciben --mov-i (0, 1, 2...) para escalonarse,
- * con tope para que la última de una grilla larga no tarde de más. */
+/* Aparición de elementos al hacer scroll. */
 (function () {
     "use strict";
 
-    // Cancela el respaldo del <head> (que muestra todo si este script no
-    // llega a correr).
+    // Cancela el respaldo definido en el <head>.
     clearTimeout(window.__movimientoRespaldo);
 
     // Mantener sincronizada con el :is(...) de movimiento.css.

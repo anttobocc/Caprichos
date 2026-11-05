@@ -1,11 +1,4 @@
-"""Genera el mensaje de WhatsApp para un pedido ya confirmado.
-
-El pedido NO se procesa como pago online: el cliente arma su pedido, lo
-confirma en el sitio y el sistema le arma un mensaje con el detalle
-completo para que lo envíe por WhatsApp al negocio. El número siempre se
-lee de ConfiguracionNegocio.get_solo() (única fuente de verdad, ya definida
-desde la Etapa 2), nunca hardcodeado.
-"""
+"""Mensaje de WhatsApp con el detalle de un pedido confirmado."""
 from urllib.parse import quote
 
 from panel.models import ConfiguracionNegocio

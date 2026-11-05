@@ -45,15 +45,7 @@
         <a href="{% url 'panel:configuracion' %}" class="{% if url_actual == 'configuracion' %}activo{% endif %}">Configuración</a>
     </nav>
 
-    {% comment %}
-    Header + nav mobile (≤767px, ver panel.css): NO es el mismo header/nav de
-    arriba encogido — son elementos nuevos, ocultos en escritorio por CSS, que
-    reemplazan visualmente a .panel-header/.panel-nav en pantallas chicas
-    (mismo criterio que .home-desktop/.home-mobile en la home pública: dos
-    interfaces separadas, no una sola achicada). Mismos 6 links y mismas
-    acciones de cuenta que arriba, duplicados acá adentro del cajón off-canvas
-    para no tocar en absoluto el header/nav de escritorio existentes.
-    {% endcomment %}
+    {# Header y navegación mobile #}
     <header class="panel-header-movil">
         <button type="button" class="panel-header-movil__menu" data-panel-nav-abrir aria-expanded="false" aria-controls="panel-nav-movil" aria-label="Abrir menú">
             <span aria-hidden="true">☰</span>

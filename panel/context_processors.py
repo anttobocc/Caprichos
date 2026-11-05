@@ -4,9 +4,7 @@ from .models import ConfiguracionNegocio
 
 
 def _google_maps_url(direccion):
-    """Link de búsqueda de Google Maps para la dirección del negocio. Si la
-    dirección no nombra la ciudad, se agrega Corrientes para que Maps no
-    la busque en otra ciudad con una calle del mismo nombre."""
+    """Link de Google Maps para la dirección del negocio (agrega la ciudad si falta)."""
     if not direccion:
         return ""
     consulta = direccion if "corrientes" in direccion.lower() else f"{direccion}, Corrientes, Argentina"
@@ -14,9 +12,7 @@ def _google_maps_url(direccion):
 
 
 def configuracion_negocio(request):
-    """Expone la configuración del negocio (WhatsApp, dirección, envíos,
-    anticipación) a todos los templates públicos, para no hardcodear estos
-    datos en el header/footer."""
+    """Configuración del negocio disponible en todos los templates."""
     config = ConfiguracionNegocio.get_solo()
     return {
         "configuracion_negocio": config,

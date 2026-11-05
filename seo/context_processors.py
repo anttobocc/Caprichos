@@ -6,9 +6,7 @@ APPS_NO_INDEXABLES = {"panel", "pedidos", "usuarios"}
 
 
 def seo(request):
-    """Datos comunes para las etiquetas SEO de base.html: URL canónica
-    (sin parámetros de búsqueda), URL base absoluta para Open Graph y si la
-    página es indexable."""
+    """URL canónica, URL base e indexabilidad para las etiquetas SEO."""
     match = getattr(request, "resolver_match", None)
     app = match.app_name if match else ""
     base = request.build_absolute_uri("/").rstrip("/")

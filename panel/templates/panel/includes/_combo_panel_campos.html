@@ -1,10 +1,4 @@
-{% comment %}
-Cuerpo del panel de Combo: campos del combo + formset de opciones a
-elección (ej. "Mini tarta" con sus sabores), que el cliente elige al
-agregar el combo al carrito. Se usa como "cuerpo_template" de
-_panel_formulario.html (espera "form" y "formset" en el contexto), y
-también lo reutiliza panel/combo_form.html.
-{% endcomment %}
+{# Campos del formulario de combo y sus opciones a elección. #}
 {% include "panel/includes/_campo.html" with field=form.nombre %}
 {% include "panel/includes/_campo.html" with field=form.descripcion %}
 {% include "panel/includes/_campo.html" with field=form.precio_promocional %}

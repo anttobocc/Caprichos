@@ -1,13 +1,4 @@
-{% comment %}
-Estado de "pedido confirmado" dentro del drawer (reemplaza el contenido de
-[data-carrito-cuerpo] después de un checkout AJAX exitoso). El link de
-WhatsApp llega armado por completo desde el servidor (whatsapp.construir_url,
-ver pedidos/views.py) — abrir wa.me con un mensaje precompletado requiere
-que el USUARIO haga el click (los navegadores bloquean popups/nuevas
-pestañas abiertas por JS fuera de un click real), así que este es un botón
-real que el cliente presiona para mandar el mensaje, no un envío automático
-silencioso. Ver la explicación completa en el resumen de la tarea.
-{% endcomment %}
+{# Confirmación del pedido dentro del carrito lateral. #}
 <div class="carrito-drawer__confirmacion">
     <span class="carrito-drawer__confirmacion-icono" aria-hidden="true">✓</span>
     <h3>¡Pedido registrado!</h3>

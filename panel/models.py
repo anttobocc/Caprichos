@@ -49,12 +49,7 @@ class ConfiguracionNegocio(models.Model):
         validators=[MinValueValidator(50), MaxValueValidator(5000)],
         help_text="Alto de la imagen en px (el ancho se ajusta proporcionalmente).",
     )
-    # Igual que Categoria.imagen_mobile_*: ajuste independiente para la
-    # tarjeta "Pedidos" del grid mobile (.m-card--cta), que es un diseño
-    # propio y no una copia reducida de la tarjeta desktop. La imagen es
-    # una capa libre sobre TODA la tarjeta, por eso X/Y admiten valores
-    # fuera de 0-100 (SmallIntegerField, no Positive) y el tamaño no tiene
-    # techo atado a ningún recuadro fijo.
+    # Posición y tamaño de la imagen en la tarjeta mobile (igual que en Categoria).
     pedidos_imagen_mobile_pos_x = models.SmallIntegerField(
         verbose_name="posición horizontal mobile (X)",
         default=50,

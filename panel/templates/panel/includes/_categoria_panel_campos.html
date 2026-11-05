@@ -1,18 +1,4 @@
-{% comment %}
-Cuerpo del panel de Categoría: Nombre, Descripción, Imagen de portada y el
-editor visual de posición (solo arrastrar; X/Y/tamaño van como campos
-ocultos y el tamaño se ajusta desde el código), sincronizado por
-static/js/panel_categoria_imagen.js. No se muestra el slug (se autogenera
-desde el nombre, ver CategoriaForm._slug_unico) ni "orden" (se arrastra y
-suelta en la lista, ver panel_categorias_orden.js).
-
-Presentación con encabezados de sección (ícono + título) y caja de
-Visibilidad — ver "admin-seccion-titulo"/"admin-imagen-caja"/
-"admin-visibilidad-fila" en panel.css. Estas clases son propias de este
-formulario (no las usan producto/portada/pedidos, que reutilizan el mismo
-"data-imagen-editor"/ImagenSimpleWidget con su presentación original) para
-no alterar esos otros formularios.
-{% endcomment %}
+{# Campos del formulario de categoría con el editor de imagen. #}
 {% include "panel/includes/_campo.html" with field=form.nombre %}
 {% include "panel/includes/_campo.html" with field=form.descripcion %}
 {{ form.slug }}

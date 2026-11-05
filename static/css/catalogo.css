@@ -93,12 +93,6 @@
     text-transform: uppercase;
 }
 
-/* display:flex (no grid) porque la cantidad de links es variable: "Combos"
-   aparece/desaparece según haya combos activos (ver hay_combos_activos en
-   context_processors.py). Un grid a N columnas fijas + nth-child se rompe
-   apenas cambia esa cantidad — ver commit que agregó Combos como 4to link,
-   se iba a una segunda línea porque el grid estaba fijo a 3 columnas. Flex
-   con gap flexible centra cualquier cantidad de links en una sola línea. */
 .site-nav:not(.site-nav--mobile) {
     grid-column: 2;
     justify-self: stretch;
@@ -314,10 +308,6 @@
     background: var(--color-crema-oscuro);
 }
 
-/* Difuminado del borde izquierdo: overlay sobre la foto, no una máscara
-   sobre la foto en sí. La imagen (<img>) queda intacta y nítida; el
-   degradado del color del hero se superpone y se desvanece hacia la
-   derecha, fusionando el borde con el fondo sin afectar el resto de la foto. */
 .hero__imagen-marco::before {
     content: "";
     position: absolute;
@@ -334,15 +324,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* object-position ya cubre el recorte disponible a zoom 100% (en esta
-       foto eso alcanza para mover Y, pero X no tiene margen porque el
-       ancho de la imagen ya calza justo con el del marco — es una
-       limitación geométrica del "cover", no un bug). El translate() de
-       abajo solo entra en juego cuando --img-zoom supera 100: al agrandar
-       la imagen más de lo necesario para cubrir el marco se genera margen
-       nuevo en AMBOS ejes que X/Y puede usar para paneo. A zoom 100 el
-       translate da 0 siempre, así que el resultado por defecto es
-       idéntico al de antes. */
     object-position: calc(var(--img-x, 50) * 1%) calc(var(--img-y, 32) * 1%);
     transform:
         translate(
@@ -422,24 +403,12 @@
 
 .categoria-card__imagen {
     position: absolute;
-    /* right/bottom son el "ancla" calibrada de cada categoría: la posición
-       que le corresponde cuando --imagen-x/--imagen-y están en 50 (centro,
-       "sin ajuste"). Antes el transform de abajo sumaba SIEMPRE una
-       constante fija (-8vw/-6vw) además de estos valores, así que 50 nunca
-       era realmente el centro — quedaba corrido por esa constante. Estos
-       right/bottom ya incorporan esa corrección (se recalibraron +8vw/+6vw
-       respecto de los valores anteriores) para que el aspecto visual actual
-       del sitio no cambie, pero ahora sí: en 50, transform da (0,0). */
     right: -6.0483vw;
     bottom: -2.0836vw;
     z-index: 1;
     pointer-events: none;
     line-height: 0;
 
-    /* --imagen-x/--imagen-y llegan en % (0-100, 50 = centro/sin ajuste) desde
-       el panel; se reescalan a vw para que el desplazamiento sea siempre
-       proporcional al viewport, nunca en px físicos. En 50 el resultado es
-       exactamente 0: no hay offset oculto sumado aparte. */
     transform: translate(
         calc((var(--imagen-x, 50) - 50) * 1.51858vw),
         calc((var(--imagen-y, 50) - 50) * 1.51858vw)
@@ -467,15 +436,6 @@
 
 .categoria-card__imagen img {
     display: block;
-    /* Lineal, sin techo oculto. Antes había un min(..., var(--card-h)*0.78)
-       que actuaba como techo "de seguridad", pero el valor por defecto del
-       modelo (imagen_tamano=260) YA lo superaba: cualquier valor de 260
-       para arriba se veía SIEMPRE igual (por eso "el tamaño no respondía").
-       El coeficiente de acá (0.003) se eligió para que 260 dé exactamente
-       ese mismo 78% de alto de tarjeta que quedaba fijo antes -> mismo
-       aspecto visual de hoy, pero ahora la escala completa responde. La
-       tarjeta (.categoria-card) ya tiene overflow:hidden, así que un valor
-       extremo se recorta ahí en vez de depender de otro techo acá. */
     height: calc(var(--imagen-size, 260) * var(--card-h) * 0.003);
     width: auto;
     object-fit: contain;
@@ -506,16 +466,7 @@
     background: var(--color-crema-oscuro);
 }
 
-/* ===== Sello de anticipación (sello circular sobre la grilla de categorías) ===== */
-/* Hijo directo de .categorias-grid (su padre position:relative, ver
-   regla de esa clase): left:75% cae exactamente en el borde entre la
-   3ra y 4ta columna de esta grilla de 4 columnas iguales — el límite
-   real entre "Empanadas" y "Pedidos" — a cualquier ancho de pantalla,
-   sin ningún vw/px calculado a mano ni depender del viewport completo.
-   translateX(-50%) centra el círculo (no su borde izquierdo) sobre esa
-   línea. Vertical: "top" negativo lo hace sobresalir por encima de la
-   grilla, el mismo tipo de superposición que antes tenía sobre el
-   borde del hero, solo que ahora contra este contenedor. */
+/* ===== Sello de anticipación ===== */
 .sello-pedidos {
     position: absolute;
     top: -6vw;
@@ -600,15 +551,11 @@
 
 /* ===== Destacados / grillas de producto ===== */
 .destacados {
-    /* El padding-top era 96px: dejaba un salto muy grande entre la sección
-       de categorías y el corazón decorativo de "Productos destacados". */
     padding: 40px 24px 64px;
     background: var(--color-crema-oscuro);
 }
 
 .destacados .contenedor {
-    /* Ancho suficiente para 5 tarjetas de 240px + 4 gaps de 28px, así la
-       grilla de destacados puede llegar a 5 por fila (ver .productos-grid--destacados). */
     max-width: 1320px;
 }
 
@@ -714,10 +661,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* --img-x/--img-y/--img-zoom llegan del panel en % (x/y: 0-100, 50 =
-       centro; zoom: 100-200, 100 = sin acercar). object-position mueve el
-       foco dentro del recorte y el scale() amplía sin deformar ni afectar
-       el layout de la página. */
     object-position: calc(var(--img-x, 50) * 1%) calc(var(--img-y, 50) * 1%);
     transform: scale(calc(var(--img-zoom, 100) / 100));
 }
@@ -1038,17 +981,6 @@
 }
 
 .site-footer__divisor {
-    /* Esta clase se usa en dos lugares: dentro de .site-footer__marca-bloque
-       (donde queda centrada porque el padre es un flex-column con
-       align-items:center) y como bloque suelto envuelto en .contenedor
-       (donde depende de que .contenedor pueda centrarse solo con
-       margin:0 auto). El "0" horizontal de un margin shorthand de 3
-       valores pisaba ESE auto con un 0px fijo — por eso en desktop el
-       segundo divisor (entre la grilla de columnas y los íconos
-       sociales) quedaba pegado a la izquierda en vez de centrado; en
-       mobile no se notaba porque .contenedor pierde su padding lateral
-       amplio y la desviación es mínima. Con "auto" explícito acá, ambos
-       casos quedan centrados sin depender de la cascada. */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1100,9 +1032,6 @@
     background: rgba(250, 243, 232, 0.4);
 }
 
-/* Movimiento del footer: solo transform/opacity/colores, con curvas
-   ease-out fuertes. Hover detrás de (hover: hover) para que en celulares
-   el toque no deje el botón "pegado" en estado hover. */
 .site-footer {
     --footer-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -1156,8 +1085,6 @@
     transform: scale(0.94);
 }
 
-/* Etiqueta flotante sobre cada círculo (en el de ubicación muestra la
-   dirección). Aparece desde abajo, anclada al ícono. */
 .site-footer__tooltip {
     position: absolute;
     bottom: calc(100% + 10px);
@@ -1189,8 +1116,6 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-    /* ".site-footer" delante para ganarle a ".site-footer a:hover", que
-       pintaría el ícono del mismo terracota que el fondo. */
     .site-footer .site-footer__whatsapp:hover,
     .site-footer .site-footer__social-icono:hover {
         background-color: var(--color-terracota);
@@ -1442,7 +1367,7 @@
     width: 100%;
 }
 
-/* ----- Control de cantidad "− N +", reutilizable en cualquier página ----- */
+/* ----- Control de cantidad ----- */
 .stepper-cantidad {
     display: inline-flex;
     align-items: center;
@@ -1483,8 +1408,6 @@
     font-size: 0.85rem;
     background: var(--color-blanco-calido);
     color: var(--color-marron);
-    /* readonly: se cambia únicamente con los botones −/+, nunca tipeando
-       (evita cantidades inválidas y mantiene una sola fuente de verdad). */
     pointer-events: none;
     -moz-appearance: textfield;
 }
@@ -1495,7 +1418,7 @@
     margin: 0;
 }
 
-/* ----- Datos del cliente + finalizar (inline, sin página aparte) ----- */
+/* ----- Datos del cliente ----- */
 .carrito-drawer__checkout {
     margin-top: auto;
     padding-top: 16px;
@@ -1587,7 +1510,7 @@
     flex-shrink: 0;
 }
 
-/* ----- Selector de fecha propio (reemplaza el <input type="date"> nativo) ----- */
+/* ----- Selector de fecha ----- */
 .fecha-picker {
     position: relative;
 }
@@ -1634,10 +1557,6 @@
     border: 1px solid var(--color-beige);
     border-radius: 12px;
     box-shadow: 0 12px 28px -14px rgba(59, 46, 38, 0.5);
-    /* Nunca puede desbordar el panel del drawer (min(420px, 92vw)) por los
-       lados: el grid de abajo reparte los botones en columnas que entran
-       en ese ancho, así que esto solo protege por si algún día se usa en
-       un contenedor más angosto. */
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -1743,46 +1662,14 @@
     padding: 4px;
 }
 
-/* ============================================================
-   RESPONSIVE — un solo quiebre (767px) separa dos interfaces:
-
-   - Por encima de 767px: SIEMPRE el diseño de escritorio de
-     siempre. Ninguna regla de acá abajo lo toca.
-   - 767px y por debajo: la home usa .home-mobile (clases "m-*",
-     ver catalogo/home.html) en vez de .home-desktop; el resto
-     del sitio (header, footer, grillas de producto) se adapta
-     con reglas puntuales, sin encimar breakpoints.
-
-   Antes había un quiebre de tablet (900px) y otro de mobile
-   (600px), cada uno pisando/afinando valores del anterior para
-   .hero/.categoria-card/.sello-pedidos — esa cadena de parches
-   se eliminó por completo junto con el hero/categorías de
-   desktop reducido que intentaban adaptar: .home-mobile es una
-   interfaz nueva, no una versión más chica de esa.
-   ============================================================ */
+/* ===== Responsive (mobile ≤767px) ===== */
 .home-mobile {
     display: none;
 }
 
-/* ============================================================
-   Estilos de .m-* (contenido de .home-mobile): a propósito FUERA
-   de cualquier @media. Lo que se ve (tamaños, grilla, imágenes)
-   queda separado de CUÁNDO se ve (el @media de más abajo).
-   Como las clases "m-*" solo existen dentro de .home-mobile, no
-   hay riesgo de que esto se filtre a desktop.
-   ============================================================ */
+/* ===== Home mobile (.m-*) ===== */
 
 /* ---------- m-hero: portada mobile ---------- */
-/* La sección entera (imagen + bloque de texto + flores + sello) es
-   flujo normal: sin position:fixed/sticky/transform en .m-hero,
-   .m-hero__imagen ni .m-hero__texto. Antes había un will-change:
-   transform acá pensado para evitar que el navegador recompusiera
-   imagen y texto como capas separadas durante el scroll, pero en la
-   práctica lograba justo lo contrario: promovía a .m-hero a su propia
-   capa de composición, y esa capa terminaba desincronizándose del
-   resto del documento en el scroll de mobile — es decir, ERA la causa
-   del "el texto se mueve independiente", no la solución. Se quitó a
-   propósito; no reintroducir will-change/transform en este bloque. */
 .m-hero__imagen {
         position: relative;
         width: 100%;
@@ -1831,42 +1718,9 @@
         text-align: center;
         padding: 40px 24px 48px;
         background: var(--color-crema-oscuro);
-        /* .m-hero__flores (ver abajo) se dejan sobresalir del ancho de
-           este contenedor a propósito, pero el recorte de ese sobrante
-           tiene que pasar ACÁ, no dejárselo al overflow-x:hidden global
-           de <body> (ver base.css): ese contenido escapando hasta el
-           borde real del documento es lo que en mobile alteraba el
-           containing block del carrito lateral (position:fixed), que
-           vive fuera de .home-mobile — el drawer se abría desplazado
-           solo en Inicio. Con el recorte local acá, el resultado visual
-           no cambia (el ancho de este bloque ya es el ancho completo de
-           pantalla en mobile), pero nada de Home se filtra fuera de la
-           página.
-
-           IMPORTANTE: tiene que ser "overflow: hidden" en los DOS ejes,
-           nunca solo "overflow-x: hidden". Con overflow-x:hidden y
-           overflow-y en su default (visible), la spec de CSS obliga al
-           navegador a recalcular ese overflow-y como "auto" — este
-           elemento pasaba a ser, sin que se viera en ningún lado del
-           código, un contenedor con scroll propio. .m-hero__flores es
-           position:absolute con una imagen de aspect-ratio 1024x1536:
-           a 210px de ancho renderiza ~315px de alto y sobresale por
-           abajo del cuerpo de texto, así que ese scroll-y "fantasma"
-           SÍ tenía contenido para desplazar. Eso es lo que en el
-           teléfono se sentía como que la franja completa "rebotaba"
-           sola al tocarla (el scroll elástico/rubber-band de iOS
-           enganchando ese contenedor interno en vez de dejar pasar el
-           gesto a la página). overflow:hidden en los dos ejes recorta
-           igual el sobrante horizontal y además el vertical (que nunca
-           debía verse) sin crear ningún contenedor desplazable. */
         overflow: hidden;
     }
 
-    /* Mismo recurso que .hero__flores en desktop (flores-portada.png),
-       reescalado a mobile: dos copias grandes a los laterales, la
-       derecha espejada con scaleX(-1), opacidad baja y por debajo del
-       texto (z-index) para que queden como fondo decorativo sin
-       interferir con la lectura. */
     .m-hero__flores {
         position: absolute;
         top: 14px;
@@ -1945,14 +1799,6 @@
     }
 
     .m-card {
-        /* overflow:hidden acá (no en .m-card__imagen, ver abajo): con
-           min-height en vez de height, el texto de más líneas a 320px
-           sigue empujando la tarjeta hacia abajo en vez de recortarse
-           (el motivo original de por qué esto estaba en "sin
-           overflow:hidden" antes) — este overflow solo entra en juego
-           para la CAPA de imagen, que ahora puede arrastrarse bien
-           afuera de los límites de la tarjeta: sin este límite se saldría
-           por encima de la tarjeta vecina o produciría scroll horizontal. */
         position: relative;
         overflow: hidden;
         min-height: 212px;
@@ -1969,10 +1815,6 @@
     }
 
     .m-card__cuerpo {
-        /* Franja para el texto a la izquierda: el MISMO % que el width de
-           .m-card__imagen (abajo), ambos resueltos contra la misma caja
-           border-box de .m-card — así la imagen nunca puede invadir esta
-           columna, a cualquier ancho de pantalla. */
         position: relative;
         z-index: 2;
         padding-right: 50%;
@@ -2020,18 +1862,6 @@
     }
 
     .m-card__imagen {
-        /* Capa libre sobre TODA la tarjeta (no una caja recortada a un
-           rincón): inset:0 la hace coincidir en tamaño con .m-card. El
-           translate/scale de --imagen-x/-y/-size (ver abajo)
-           se aplica ACÁ, no en el <img>, exactamente como
-           .categoria-card__imagen en desktop: mover/escalar el contenedor
-           entero en vez del <img> es lo que permite que el % de
-           translate() se resuelva contra el tamaño de LA TARJETA (ya que
-           translate() en % siempre es relativo a la propia caja del
-           elemento transformado) en vez de contra el tamaño chico de la
-           foto. pointer-events:none replica el mismo patrón de desktop:
-           en el sitio público esta capa no debe interceptar clicks (el
-           enlace "Ver más" vive en .m-card__cuerpo). */
         position: absolute;
         inset: 0;
         pointer-events: none;
@@ -2044,19 +1874,6 @@
     }
 
     .m-card__imagen img {
-        /* Posición BASE (antes de que el translate/scale de arriba mueva
-           nada): abajo a la derecha, la mitad del ancho de la tarjeta,
-           igual que el diseño ya aprobado — el alto sale solo del aspect
-           ratio real de la foto (1536x1024, 3:2, verificado con PIL, las
-           4 fotos idénticas) porque no hay ningún alto forzado. Con
-           --imagen-x/-y en 50 y --imagen-size en 100 (los valores por
-           defecto) el transform del padre da translate(0,0) scale(1):
-           el resultado es EXACTAMENTE esta posición base, sin mover
-           nada — recién se corre/escala cuando el panel guarda otro
-           valor. object-fit:contain es un resguardo para una imagen
-           subida a mano con otra proporción (categorías sin arte
-           dedicado): nunca la recorta, como mucho dej a un margen
-           dentro de su propio ancho/alto. */
         position: absolute;
         right: 0;
         bottom: 0;
@@ -2068,11 +1885,7 @@
         display: block;
     }
 
-/* ============================================================
-   Responsive del resto del sitio (no exclusivo de home): sí
-   depende del ancho real de pantalla, así que se queda dentro
-   de @media. Separado del bloque .m-* de arriba a propósito.
-   ============================================================ */
+/* ===== Responsive del resto del sitio ===== */
 @media (max-width: 767px) {
     /* ---------- Header / navegación (compartido en todo el sitio) ---------- */
     .site-header__fila {
@@ -2123,7 +1936,7 @@
         display: block;
     }
 
-    /* ---------- Resto del sitio (compartido, no exclusivo de home) ---------- */
+    /* ---------- Resto del sitio ---------- */
     .titulo-decorado {
         font-size: 1.4rem;
     }

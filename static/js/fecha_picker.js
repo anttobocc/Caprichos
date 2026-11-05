@@ -1,20 +1,4 @@
-/* Selector de fecha propio para el campo fecha_pedido (reemplaza el
- * <input type="date"> nativo). Ver pedidos/templates/pedidos/_fecha_picker.html.
- *
- * El rango válido (data-min/data-max en [data-fecha-picker]) lo calcula
- * SIEMPRE el servidor (CheckoutForm.fecha_minima/fecha_maxima, ver
- * pedidos/forms.py) — acá solo se enumera día por día ese rango y se arma
- * un botón grande por cada fecha disponible; no hay ninguna fecha inválida
- * para elegir porque no se renderiza ningún botón fuera del rango. El año
- * nunca se tipea: sale de construir objetos Date reales día a día a partir
- * de data-min, así que un rango que cruza de diciembre a enero avanza de
- * año solo (Date.setDate se encarga de eso).
- *
- * Delegación de eventos en document (en vez de bind por instancia): el
- * drawer del carrito reemplaza su innerHTML entero al agregar/quitar
- * productos (ver carrito_drawer.js actualizarCuerpo), lo que destruye
- * cualquier listener puesto directamente sobre los nodos. Con delegación
- * no hace falta re-inicializar nada después de ese reemplazo. */
+/* Selector de fecha para el campo fecha_pedido. */
 (function () {
     "use strict";
 

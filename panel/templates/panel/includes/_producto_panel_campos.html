@@ -1,18 +1,4 @@
-{% comment %}
-Cuerpo del panel de Producto: campos del producto + formset de variantes.
-Se usa como "cuerpo_template" de _panel_formulario.html (espera "form" y
-"formset" en el contexto), y también lo reutiliza panel/producto_form.html
-(la página completa que sirve de fallback cuando la validación falla).
-
-Formulario deliberadamente compacto: no incluye slug, descripción (corta
-ni larga), ni el estado activo/inactivo del producto (ver
-[[panel-productos-form-compacto]]). El orden va:
-Categoría/Nombre, Precio/Unidad, Variantes, Destacado, Imagen.
-
-Modalidad (Cocinadas/Congeladas) solo se muestra en categorías que la usan
-(hoy Empanadas y Pizza); en el resto la columna se oculta y queda vacía.
-Ver static/js/panel_variantes.js.
-{% endcomment %}
+{# Campos del formulario de producto y sus variantes. #}
 <div class="admin-producto-form__fila">
     {% include "panel/includes/_campo.html" with field=form.categoria %}
     {% include "panel/includes/_campo.html" with field=form.nombre %}

@@ -32,14 +32,8 @@ from .permisos import panel_admin_required
 
 FILAS_POR_PAGINA = 20
 
-# Variantes predeterminadas por categoría (cantidad, y opcionalmente
-# modalidad para productos con dos ejes de compra como Empanadas). Al crear
-# un producto nuevo, el panel prellena estas filas en JS según la categoría
-# elegida; el administrador solo completa el precio de cada combinación.
-# Primero se copian las variantes del último producto cargado en esa
-# categoría (así una categoría nueva, como Pastafrola, "aprende" sus
-# tamaños del primer producto que se carga); este diccionario es solo el
-# punto de partida para categorías que todavía no tienen productos.
+# Variantes sugeridas por categoría al crear un producto. Si la categoría
+# ya tiene productos, se usan las del último cargado.
 PLANTILLAS_VARIANTES_POR_CATEGORIA = {
     "empanadas": {
         "cantidades": ["Unidad", "Media docena", "Docena"],
@@ -90,8 +84,7 @@ def _plantillas_variantes_json():
         filas = _plantilla_desde_productos(categoria) or _plantilla_variantes(categoria.slug)
         categorias[categoria.pk] = {
             "filas": filas,
-            # La columna Modalidad (Cocinadas/Congeladas) solo se muestra en
-            # categorías que la usan; en el resto queda oculta y vacía.
+            # La columna Modalidad solo se muestra en las categorías que la usan.
             "usa_modalidad": any(fila["modalidad"] for fila in filas),
         }
     return json.dumps({
@@ -296,10 +289,7 @@ def categoria_toggle_activo(request, pk):
 @panel_admin_required
 @require_POST
 def categoria_reordenar(request):
-    """Guarda el nuevo orden tras arrastrar y soltar una fila en la lista
-    de categorías (ver static/js/panel_categorias_orden.js). Recibe
-    {"orden": [id, id, ...]} en el orden visual final; cada id se
-    corresponde con una posición (índice) que pasa a ser su "orden"."""
+    """Guarda el orden de las categorías recibido como {"orden": [id, ...]}."""
     try:
         datos = json.loads(request.body)
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -335,10 +325,7 @@ def categoria_eliminar(request, pk):
 
 
 def _variantes_activas(formset):
-    """Variantes que quedarían activas tras guardar el formset (no marcadas
-    para borrar). El formulario ya no expone "activo": toda variante que
-    llega hasta acá se crea/mantiene activa (default del modelo), así que
-    alcanza con que tenga datos y no esté marcada para eliminar."""
+    """Variantes que quedan activas al guardar (con datos y sin marcar para borrar)."""
     activas = []
     for form in formset.forms:
         if not form.cleaned_data:
@@ -350,9 +337,7 @@ def _variantes_activas(formset):
 
 
 def _validar_coherencia_precio(prod_form, formset):
-    """Producto sin variantes activas -> precio obligatorio.
-    Producto con variantes activas -> precio debe quedar vacío (error
-    explícito si se cargó, nunca se limpia solo)."""
+    """Sin variantes activas el precio es obligatorio; con variantes debe quedar vacío."""
     precio = prod_form.cleaned_data.get("precio")
     hay_variantes_activas = bool(_variantes_activas(formset))
     if hay_variantes_activas and precio is not None:
@@ -373,9 +358,7 @@ def _validar_coherencia_precio(prod_form, formset):
 @panel_admin_required
 def productos_lista(request):
     query = request.GET.get("q", "").strip()
-    # Ordenado por categoría primero para que el template pueda agruparlos
-    # visualmente con {% ifchanged %} sin tocar la estructura de datos ni
-    # duplicar productos.
+    # Ordenado por categoría para agrupar en el template.
     productos = Producto.objects.select_related("categoria").order_by("categoria__orden", "categoria__nombre", "nombre")
     if query:
         productos = productos.filter(nombre__icontains=query)
@@ -483,8 +466,7 @@ def producto_eliminar(request, pk):
 def pedidos_lista(request):
     query = request.GET.get("q", "").strip()
     estado = request.GET.get("estado", "").strip()
-    # "asc" = fecha de pedido más antigua primero; cualquier otro valor (o
-    # ausente) = más reciente primero, el orden por defecto de siempre.
+    # "asc": más antiguos primero; por defecto, más recientes primero.
     orden = request.GET.get("orden", "").strip()
     orden_campo = "fecha_pedido" if orden == "asc" else "-fecha_pedido"
     pedidos = Pedido.objects.order_by(orden_campo, "-pk")

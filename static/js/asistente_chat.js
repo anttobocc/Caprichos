@@ -1,12 +1,4 @@
-/*
- * Asistente de Capricho: chat flotante conectado a un workflow de n8n.
- *
- * Envía al webhook de n8n: { pregunta, sessionId }
- * Espera de n8n:          { respuesta }
- *
- * sessionId identifica la conversación para que la memoria del agente de
- * IA (Simple Memory en n8n) recuerde lo que se habló antes.
- */
+/* Chat flotante del asistente (n8n). */
 (function () {
     "use strict";
 
@@ -56,8 +48,7 @@
         lanzador.focus();
     }
 
-    // Convierte el texto en nodos seguros (sin innerHTML): respeta saltos
-    // de línea, **negritas** y vuelve clickeables los enlaces http(s).
+    // Convierte el texto en nodos seguros (sin innerHTML).
     function pintarTexto(nodo, texto) {
         var lineas = String(texto).split("\n");
         lineas.forEach(function (linea, i) {

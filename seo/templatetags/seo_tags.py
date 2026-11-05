@@ -1,11 +1,4 @@
-"""Datos estructurados (JSON-LD de schema.org) para SEO local y de producto.
-
-- jsonld_negocio: ficha de negocio local (Bakery) con nombre, dirección,
-  teléfono (NAP), zona de envíos y redes. Es lo que Google usa junto con
-  el Google Business Profile para las búsquedas locales.
-- jsonld_producto / jsonld_combo: producto con precio en ARS y
-  disponibilidad, para que Google pueda mostrar resultados enriquecidos.
-"""
+"""Datos estructurados JSON-LD (schema.org) del negocio, productos y combos."""
 import json
 
 from django import template
@@ -17,8 +10,7 @@ register = template.Library()
 
 
 def _script(datos):
-    # Se escapan <, > y & para que ningún texto cargado desde el panel pueda
-    # cerrar el <script> (mismo criterio que el filtro json_script de Django).
+    # Escapa <, > y & para que el texto no pueda cerrar el <script>.
     texto = json.dumps(datos, ensure_ascii=False)
     texto = texto.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     return mark_safe(f'<script type="application/ld+json">{texto}</script>')
@@ -29,8 +21,7 @@ def _absoluta(request, url):
 
 
 def descripcion_meta(*textos, largo=155):
-    """Primer texto no vacío, sin HTML ni saltos de línea, recortado al
-    largo que Google suele mostrar en la meta description."""
+    """Primer texto no vacío, sin HTML, recortado al largo de una meta description."""
     for texto in textos:
         limpio = " ".join(strip_tags(texto or "").split())
         if limpio:
@@ -40,8 +31,7 @@ def descripcion_meta(*textos, largo=155):
 
 @register.filter
 def url_segura(archivo):
-    """URL de un ImageField, o "" si no tiene archivo (evita el ValueError
-    de .url sobre un campo vacío)."""
+    """URL de un ImageField, o "" si no tiene archivo."""
     try:
         return archivo.url if archivo else ""
     except ValueError:
@@ -66,9 +56,7 @@ def _pesos(valor):
 
 @register.simple_tag
 def meta_producto(producto):
-    """Meta description de un producto: su descripción (si está cargada) y
-    siempre nombre, precio, ciudad y forma de pedido, que es lo que busca
-    la gente ("tarta de coco Corrientes", "empanadas a domicilio")."""
+    """Meta description de un producto con nombre, precio y ciudad."""
     nombre = producto.nombre
     if producto.descripcion_corta:
         nombre += f" ({producto.descripcion_corta.rstrip('.')})"

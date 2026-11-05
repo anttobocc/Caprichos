@@ -4,7 +4,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
     <link rel="stylesheet" href="{% static 'css/movimiento.css' %}">
-    {# Activa la aparición al hacer scroll antes del primer pintado (sin parpadeo). Si movimiento.js no llega a correr, a los 3 s se muestra todo igual. #}
+    {# Activa las animaciones de scroll antes del primer pintado. #}
     <script>document.documentElement.classList.add("con-js");window.__movimientoRespaldo=setTimeout(function(){document.documentElement.classList.remove("con-js");},3000);</script>
 {% endblock %}
 
@@ -22,16 +22,6 @@
 
 <header class="site-header">
     <div class="site-header__fila contenedor">
-        {% comment %}
-        El botón hamburguesa es hijo directo de esta grilla (no de
-        .site-header__acciones): en desktop queda display:none (no
-        participa del grid, cero impacto en el layout de 3 columnas
-        logo/nav/acciones). En mobile, con .site-nav oculto, los tres
-        hijos visibles (hamburguesa/logo/acciones) caen solos en las
-        columnas 1/2/3 de esa misma grilla — hamburguesa-izquierda,
-        logo-centro, carrito-derecha — sin necesitar grid-column
-        explícito ni tocar el layout de desktop.
-        {% endcomment %}
         <label for="menu-toggle" class="boton-hamburguesa" aria-label="Abrir menú">
             <span></span><span></span><span></span>
         </label>

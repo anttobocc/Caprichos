@@ -1,21 +1,4 @@
-/* Variantes de producto: tres responsabilidades independientes.
- *
- * 1) Prellena las variantes de un producto NUEVO según su categoría: copia
- *    las del último producto de esa categoría (o una plantilla base si la
- *    categoría todavía no tiene productos). Solo actúa sobre paneles
- *    data-modo="crear": al editar nunca se reemplazan variantes guardadas.
- *    Depende de window.CAPRICHO_PLANTILLAS_VARIANTES, embebido por la vista:
- *    {categorias: {id: {filas: [{nombre, modalidad, modalidad_label}],
- *    usa_modalidad}}, modalidades: [[valor, etiqueta], ...]}.
- *
- * 2) Muestra la columna Modalidad (Cocinadas/Congeladas) solo en las
- *    categorías que la usan, y permite sumar filas con "+ Agregar variante"
- *    o con atajos ("Pequeña, Mediana, Grande").
- *
- * 3) Reordena las variantes arrastrando su fila (como una playlist): cada
- *    fila tiene un handle "⠿⠿" (data-arrastrar); al soltarla se recalcula
- *    el campo oculto "orden" de cada fila según su posición final en el
- *    DOM. No hay input numérico de orden visible para el usuario. */
+/* Variantes de producto: plantillas por categoría, columna Modalidad y orden por arrastre. */
 (function () {
     "use strict";
 
@@ -133,9 +116,7 @@
         if (!p.seccion || !p.cuerpo) {
             return;
         }
-        // Al abrir un producto ya guardado, si alguna variante tiene
-        // modalidad se muestra la columna aunque la categoría no la use,
-        // para no esconder un dato existente.
+        // Si alguna variante ya tiene modalidad, se muestra la columna.
         var visible = (p.categoria && categoriaUsaModalidad(p.categoria.value)) ||
             (!limpiarSiSeOculta && hayModalidadCargada(p.cuerpo));
         p.seccion.classList.toggle("admin-variantes--sin-modalidad", !visible);
@@ -147,8 +128,7 @@
     }
 
     function quitarFilasVaciasDelFinal(p) {
-        // Solo desde el final: quitar una fila del medio dejaría huecos en
-        // los índices del formset (variantes-0, variantes-2...).
+        // Solo desde el final, para no dejar huecos en los índices del formset.
         var filas = filasDe(p.cuerpo);
         for (var i = filas.length - 1; i >= 0; i--) {
             var indice = indiceDe(filas[i]);
@@ -242,9 +222,7 @@
     function actualizarOrden(contenedor) {
         var indice = 0;
         filasDe(contenedor).forEach(function (fila) {
-            // La fila "extra" en blanco del formset no se toca: si le
-            // reescribimos "orden", Django la considera modificada y exige
-            // sus campos obligatorios aunque no se haya cargado nada.
+            // La fila extra vacía no se modifica para que Django no la valide.
             if (filaNuevaVacia(fila)) {
                 return;
             }
@@ -273,7 +251,7 @@
         fila.classList.add("admin-variante-fila--arrastrando");
         try {
             handle.setPointerCapture(evento.pointerId);
-        } catch (err) { /* no-op: algunos navegadores viejos no soportan pointer capture */ }
+        } catch (err) { /* pointer capture no soportado */ }
         evento.preventDefault();
     });
 

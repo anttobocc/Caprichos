@@ -12,11 +12,7 @@ from .models import ConfiguracionNegocio
 
 
 class ImagenSimpleWidget(forms.ClearableFileInput):
-    """ClearableFileInput reducido al botón "Seleccionar archivo": sin
-    nombre del archivo actual ni checkbox "Eliminar imagen". Elegir un
-    archivo nuevo reemplaza al anterior al guardar (comportamiento normal
-    de un ImageField); no hace falta un control de borrado aparte. Usado
-    por todos los formularios del panel que suben imágenes."""
+    """Input de imagen que solo muestra el botón de selección de archivo."""
 
     template_name = "panel/includes/_widget_imagen_simple.html"
 
@@ -37,11 +33,7 @@ def _slug_unico(model, nombre, slug_ingresado, instance_pk=None):
 
 
 class CategoriaForm(forms.ModelForm):
-    """El formulario NO expone "orden": el orden de las categorías se
-    arrastra y suelta en la lista (ver panel_categorias_orden.js +
-    categoria_reordenar), no se escribe a mano. Tampoco expone "activo"
-    (se maneja aparte, igual que antes) — sí expone "mostrar_en_productos"
-    y "mostrar_en_inicio", independientes entre sí."""
+    """El orden y el estado activo se gestionan fuera de este formulario."""
 
     class Meta:
         model = Categoria
@@ -62,10 +54,7 @@ class CategoriaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["slug"].required = False
-        # Estos tres campos los completa/actualiza el editor visual de
-        # imagen (arrastrar, botones −/+/↑/↓ y los campos numéricos) vía JS;
-        # si llegan vacíos (por ejemplo un POST manual) se usa el default
-        # del modelo en lugar de exigirlos en el formulario.
+        # Los completa el editor visual de imagen; si faltan, se usa el default del modelo.
         self.fields["imagen_pos_x"].required = False
         self.fields["imagen_pos_y"].required = False
         self.fields["imagen_tamano"].required = False
@@ -85,9 +74,7 @@ class CategoriaForm(forms.ModelForm):
 
 
 class PedidosImagenForm(forms.ModelForm):
-    """Imagen y posición/tamaño de la tarjeta "Pedidos" de la portada. No es
-    una categoría (vive en ConfiguracionNegocio), pero se edita desde el
-    mismo listado de Categorías del panel, con el mismo editor visual."""
+    """Imagen de la tarjeta "Pedidos" de la portada."""
 
     class Meta:
         model = ConfiguracionNegocio
@@ -119,10 +106,7 @@ class PedidosImagenForm(forms.ModelForm):
 
 
 class PortadaImagenForm(forms.ModelForm):
-    """Imagen principal del hero (portada) + su posición/zoom. Igual patrón
-    que PedidosImagenForm, pero en modo "recorte" (object-position % + zoom),
-    ya que la foto del hero es una imagen recortada dentro de una caja de
-    aspect-ratio fijo, no una decoración flotante como categorías/pedidos."""
+    """Imagen principal del hero con su posición y zoom."""
 
     class Meta:
         model = ConfiguracionNegocio
@@ -154,11 +138,7 @@ class PortadaImagenForm(forms.ModelForm):
 
 
 class ProductoForm(forms.ModelForm):
-    """El formulario NO expone slug, descripción (corta/larga) ni el estado
-    activo/inactivo: el slug se autogenera una sola vez (al crear) y se
-    conserva tal cual en cada edición para no romper URLs existentes, y los
-    productos siempre se crean/mantienen activos (default del modelo, ver
-    [[panel-productos-reorganizacion]])."""
+    """El slug se genera al crear y no cambia al editar, para no romper URLs."""
 
     class Meta:
         model = Producto
@@ -183,8 +163,7 @@ class ProductoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["precio"].required = False
-        # Los completa/actualiza el editor visual de imagen (mismo mecanismo
-        # que Categoria); si llegan vacíos se usa el default del modelo.
+        # Los completa el editor visual de imagen.
         self.fields["imagen_pos_x"].required = False
         self.fields["imagen_pos_y"].required = False
         self.fields["imagen_zoom"].required = False
@@ -201,9 +180,7 @@ class ProductoForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        # Slug sin campo visible: se genera solo la primera vez (al crear).
-        # Al editar se conserva el que ya tiene, aunque cambie el nombre,
-        # para no alterar URLs ya publicadas.
+        # El slug se genera solo al crear, para no alterar URLs publicadas.
         if not instance.slug:
             instance.slug = _slug_unico(Producto, instance.nombre, None, instance.pk)
         if commit:
@@ -223,8 +200,7 @@ class VarianteProductoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Sin modalidad es lo normal (tartas, alfajores, pastafrolas...): la
-        # opción vacía lo dice explícitamente en vez de "- Select an option -".
+        # Etiqueta explícita para la opción vacía.
         self.fields["modalidad"].choices = [("", "Sin modalidad"), *VarianteProducto.Modalidad.choices]
 
 
@@ -238,8 +214,7 @@ VarianteProductoFormSet = inlineformset_factory(
 
 
 class ComboForm(forms.ModelForm):
-    """Igual que ProductoForm, no expone el slug: se genera una sola vez al
-    crear y se conserva en cada edición para no romper URLs publicadas."""
+    """El slug se genera al crear y no cambia al editar."""
 
     class Meta:
         model = Combo
@@ -282,10 +257,8 @@ class ComboForm(forms.ModelForm):
 
 
 class ComboEleccionForm(forms.ModelForm):
-    """Las opciones se eligen entre los productos activos del catálogo
-    (ej. los sabores de Tartas) en vez de escribirse a mano. El selector de
-    categoría del panel es solo de interfaz: filtra qué casillas se ven
-    (ver panel_combo_elecciones.js) y no se guarda."""
+    """Opciones a elegir entre los productos activos del catálogo. El filtro
+    por categoría es solo de interfaz y no se guarda."""
 
     class Meta:
         model = ComboEleccion
@@ -327,9 +300,7 @@ ComboEleccionFormSet = inlineformset_factory(
 
 
 class UsuarioCrearForm(UserCreationForm):
-    """Crea un usuario desde el panel. A diferencia del registro público,
-    acá el administrador SÍ puede marcar "permisos administrativos"
-    (is_staff) explícitamente."""
+    """Alta de usuario desde el panel; permite asignar permisos de administración."""
 
     is_staff = forms.BooleanField(required=False, label="Permisos administrativos")
 
@@ -347,8 +318,7 @@ class UsuarioCrearForm(UserCreationForm):
 
 
 class UsuarioEditarForm(forms.ModelForm):
-    """Edita un usuario existente. Nunca incluye password (eso va por
-    SetPasswordForm en una vista aparte)."""
+    """Edición de usuario. La contraseña se cambia en una vista aparte."""
 
     class Meta:
         model = User
@@ -372,8 +342,7 @@ class ConfiguracionNegocioForm(forms.ModelForm):
 
 
 class PedidoEstadoForm(forms.ModelForm):
-    """Cambia únicamente el estado del pedido. No toca ningún otro campo:
-    ni los datos del cliente ni los ItemPedido (snapshots históricos)."""
+    """Cambia solo el estado del pedido."""
 
     class Meta:
         model = Pedido
